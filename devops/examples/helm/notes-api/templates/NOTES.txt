@@ -1,0 +1,5 @@
+notes-api {{ .Values.image.tag | default .Chart.AppVersion }} is deployed as release "{{ .Release.Name }}".
+
+Try it:
+  kubectl port-forward svc/{{ include "notes-api.fullname" . }} 8080:{{ .Values.service.port }} -n {{ .Release.Namespace }}
+  curl http://localhost:8080/

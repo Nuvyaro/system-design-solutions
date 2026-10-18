@@ -1,9 +1,21 @@
-# System Design Interview Questions & Solutions
+# System Design Ocean: System Design, AI System Design & DevOps
 
-A collection of system design interview questions with full worked solutions, split into two tracks:
+Animated, beginner-friendly tutorials plus full interview solutions, in four tracks:
 
-1. **Classic system design** – distributed systems problems asked at most backend / infrastructure interviews.
-2. **AI system design** – ML and LLM-powered systems, increasingly asked for ML engineer, AI engineer, and applied-scientist roles.
+1. **Fundamentals**: short lessons on the building blocks (caching, sharding, queues, embeddings, LLM inference, RAG…), each with an interactive simulation.
+2. **Classic system design**: distributed systems problems asked at most backend / infrastructure interviews.
+3. **AI system design**: ML and LLM-powered systems, increasingly asked for ML engineer, AI engineer, and applied-scientist roles.
+4. **DevOps**: Docker, Kubernetes, YAML and CI/CD from basics to production, with real, tested example files.
+
+## 🌊 The website
+
+Everything here is also an animated website: open `index.html` through GitHub Pages or any static server.
+
+- **Live site (after enabling Pages):** `https://nuvyaro.github.io/system-design-solutions/`
+- **Enable GitHub Pages:** repository **Settings → Pages → Build and deployment → Source: Deploy from a branch**, choose the branch (e.g. `main`) and folder **`/ (root)`**, then **Save**. No build step is needed.
+- **Run locally:** `python3 -m http.server 8000` in the repo root, then open http://localhost:8000.
+
+Site features: 33 interactive simulations, animated diagrams, practice mode with a 45-minute timer, tap-to-reveal follow-up questions, progress tracking (stored in your browser), search, and dark mode. The Markdown files are the single source of truth: the site renders them directly, so anything you edit here shows up on the site.
 
 Every solution follows the same structure so you can practice a repeatable approach:
 
@@ -18,6 +30,35 @@ Every solution follows the same structure so you can practice a repeatable appro
 9. Follow-up interview questions with model answers
 
 Start with the [interview framework](framework.md) — it explains how to run a 45–60 minute interview and has the reference numbers used in the estimates.
+
+## Fundamentals: Distributed Systems
+
+| # | Lesson | Simulation |
+|---|--------|------------|
+| 1 | [Scalability Basics](fundamentals/systems/01-scalability-basics.md) | Add servers, watch load drop |
+| 2 | [Load Balancing](fundamentals/systems/02-load-balancing.md) | Algorithms and failing servers |
+| 3 | [Caching](fundamentals/systems/03-caching.md) | Hits, misses, LRU eviction |
+| 4 | [Databases & Indexing](fundamentals/systems/04-databases-and-indexing.md) | Full scan vs index lookup |
+| 5 | [Replication](fundamentals/systems/05-replication.md) | Replication lag and stale reads |
+| 6 | [Sharding & Consistent Hashing](fundamentals/systems/06-sharding-and-consistent-hashing.md) | Hash ring: add/remove nodes |
+| 7 | [CAP & Consistency](fundamentals/systems/07-cap-and-consistency.md) | Network partition: CP vs AP |
+| 8 | [Message Queues](fundamentals/systems/08-message-queues.md) | Bursts, buffering, consumers |
+| 9 | [Reliability Patterns](fundamentals/systems/09-reliability-patterns.md) | Circuit breaker, token bucket |
+| 10 | [Back-of-Envelope Estimation](fundamentals/systems/10-back-of-envelope-estimation.md) | Live calculator |
+| 11 | [Networking, CDNs & APIs](fundamentals/systems/11-networking-cdn-and-apis.md) | Life of a request |
+
+## Fundamentals: AI & ML Systems
+
+| # | Lesson | Simulation |
+|---|--------|------------|
+| 1 | [The ML System Lifecycle](fundamentals/ai/01-ml-system-lifecycle.md) | The ML loop |
+| 2 | [Embeddings & Vector Search](fundamentals/ai/02-embeddings-and-vector-search.md) | Click to run nearest-neighbor search |
+| 3 | [How LLMs Generate Text](fundamentals/ai/03-how-llms-generate-text.md) | Prefill, decode, KV cache, temperature |
+| 4 | [LLM Serving & Batching](fundamentals/ai/04-llm-serving-and-batching.md) | Static vs continuous batching |
+| 5 | [RAG Explained](fundamentals/ai/05-rag-explained.md) | The RAG pipeline |
+| 6 | [The Recommendation Funnel](fundamentals/ai/06-recommendation-funnel.md) | 1 billion items → 20 |
+| 7 | [AI Agents](fundamentals/ai/07-ai-agents-explained.md) | Agent loop + prompt injection |
+| 8 | [Evaluation Metrics](fundamentals/ai/08-evaluation-metrics.md) | Drag the threshold: precision vs recall |
 
 ## Classic System Design
 
@@ -62,6 +103,27 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 14 | [Text-to-Image Generation Service](ai-system-design/14-image-generation-service.md) | Diffusion serving, step distillation, GPU scheduling, image safety |
 | 15 | [Real-time Voice AI Assistant](ai-system-design/15-voice-assistant.md) | Streaming ASR→LLM→TTS, latency budget, barge-in, turn-taking |
 | 16 | [Document Intelligence & Extraction](ai-system-design/16-document-extraction.md) | OCR + layout, VLM extraction, grounding, calibrated human review |
+
+## DevOps: Docker, Kubernetes & CI/CD
+
+| # | Tutorial | Level |
+|---|----------|-------|
+| 1 | [Containers & Docker Basics](devops/01-containers-and-docker-basics.md) | Beginner |
+| 2 | [Writing Dockerfiles](devops/02-writing-dockerfiles.md) | Beginner → Intermediate |
+| 3 | [Networking, Volumes & Docker Compose](devops/03-docker-networking-volumes-compose.md) | Intermediate |
+| 4 | [YAML for DevOps](devops/04-yaml-for-devops.md) (with a live playground) | Beginner → Intermediate |
+| 5 | [Kubernetes Architecture](devops/05-kubernetes-architecture.md) | Beginner |
+| 6 | [Kubernetes Workloads](devops/06-kubernetes-workloads.md) | Beginner → Intermediate |
+| 7 | [Kubernetes Networking](devops/07-kubernetes-networking.md) | Intermediate |
+| 8 | [Config & Storage](devops/08-kubernetes-config-and-storage.md) | Intermediate |
+| 9 | [Production Readiness](devops/09-kubernetes-production-readiness.md) | Advanced |
+| 10 | [Helm & Kustomize](devops/10-helm-and-kustomize.md) | Intermediate → Advanced |
+| 11 | [CI/CD with GitHub Actions](devops/11-ci-cd-with-github-actions.md) | Intermediate → Advanced |
+| 12 | [GitOps & Deployment Strategies](devops/12-gitops-and-deployment-strategies.md) | Advanced |
+| 13 | [Capstone: Code to Production](devops/13-capstone-end-to-end.md) | Hands-on |
+| 14 | [Troubleshooting & Cheat Sheet](devops/14-troubleshooting-cheatsheet.md) | Reference |
+
+The [`devops/examples`](devops/examples) folder holds a working app with its Dockerfile, Compose file, Kubernetes manifests (Kustomize base + staging/production overlays), a Helm chart, and a GitHub Actions pipeline. They are verified: unit tests pass, the image builds and runs, the manifests and rendered chart pass `kubeconform` against Kubernetes 1.30, and the workflow passes `actionlint`.
 
 ## How to use this repo
 

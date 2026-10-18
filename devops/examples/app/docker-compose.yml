@@ -1,0 +1,30 @@
+# Run locally:  docker compose up --build   →  http://localhost:8080
+services:
+  api:
+    build:
+      context: .
+      args:
+        APP_VERSION: local
+    ports:
+      - "8080:8080"            # host:container
+    environment:
+      REDIS_URL: redis://redis:6379/0   # "redis" resolves to the redis service on the compose network
+      GREETING: Hello from Docker Compose
+    depends_on:
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  redis:
+    image: redis:7.2-alpine
+    command: ["redis-server", "--appendonly", "yes"]
+    volumes:
+      - redis-data:/data       # named volume: data survives container restarts
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  redis-data:

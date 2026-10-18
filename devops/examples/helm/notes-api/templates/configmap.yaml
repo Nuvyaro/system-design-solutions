@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "notes-api.fullname" . }}
+  labels:
+    {{- include "notes-api.labels" . | nindent 4 }}
+data:
+  GREETING: {{ .Values.config.greeting | quote }}
+  REDIS_URL: {{ .Values.config.redisUrl | quote }}

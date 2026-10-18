@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>System Design Ocean</title>
+  <meta name="description" content="Animated, beginner-friendly system design and AI system design tutorials with worked interview solutions.">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%230b5cad'/%3E%3Cpath d='M8 38c6-6 12-6 18 0s12 6 18 0 10-6 12-4v14H8z' fill='%2318b6c9'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+  <div class="read-progress" id="readProgress" aria-hidden="true"></div>
+
+  <header class="topbar">
+    <button class="icon-btn menu-btn" id="menuBtn" aria-label="Open navigation" aria-expanded="false">
+      <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <a class="brand" href="#/">
+      <svg class="brand-mark" viewBox="0 0 64 64" aria-hidden="true">
+        <circle cx="32" cy="32" r="30" fill="var(--ocean)"/>
+        <path class="brand-wave" d="M4 38c7-6 14-6 21 0s14 6 21 0 12-6 14-4v20H4z" fill="var(--teal)"/>
+      </svg>
+      <span>System Design <strong>Ocean</strong></span>
+    </a>
+    <nav class="topnav" aria-label="Primary">
+      <a href="#/track/fund-systems">Fundamentals</a>
+      <a href="#/track/classic">Classic</a>
+      <a href="#/track/ai">AI Systems</a>
+      <a href="#/track/devops">DevOps</a>
+    </nav>
+    <div class="top-actions">
+      <label class="search">
+        <span class="sr-only">Search tutorials</span>
+        <input id="search" type="search" placeholder="Search… (press /)" autocomplete="off">
+      </label>
+      <button class="icon-btn" id="themeBtn" aria-label="Toggle dark mode">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" fill="currentColor"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <div class="layout">
+    <aside class="sidebar" id="sidebar" aria-label="All tutorials"></aside>
+    <div class="scrim" id="scrim"></div>
+    <main id="main" tabindex="-1"></main>
+  </div>
+
+  <footer class="footer">
+    <p>Free and open source. Content lives as Markdown in this repository — read it on GitHub or here.</p>
+  </footer>
+
+  <script src="assets/vendor/marked.min.js"></script>
+  <script src="assets/vendor/mermaid.min.js"></script>
+  <script src="assets/vendor/js-yaml.min.js"></script>
+  <script src="assets/js/catalog.js"></script>
+  <script src="assets/js/sims.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>

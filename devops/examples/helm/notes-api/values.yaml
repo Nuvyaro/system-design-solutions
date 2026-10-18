@@ -1,0 +1,33 @@
+# Default values. Override per environment:  helm upgrade --install notes ./notes-api -f values-prod.yaml --set image.tag=abc123
+replicaCount: 2
+
+image:
+  repository: ghcr.io/nuvyaro/notes-api
+  tag: ""               # defaults to .Chart.AppVersion
+  pullPolicy: IfNotPresent
+
+config:
+  greeting: "Hello from Helm"
+  redisUrl: "redis://redis:6379/0"
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: false
+  className: nginx
+  host: notes.example.com
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    memory: 256Mi
+
+autoscaling:
+  enabled: true
+  minReplicas: 2
+  maxReplicas: 10
+  targetCPUUtilizationPercentage: 70

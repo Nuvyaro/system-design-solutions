@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: notes-api
+spec:
+  type: ClusterIP
+  selector:
+    app: notes-api                # routes to pods with this label
+  ports:
+    - name: http
+      port: 80                    # port other pods call
+      targetPort: http            # container port name

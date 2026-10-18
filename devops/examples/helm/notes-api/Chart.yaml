@@ -1,0 +1,6 @@
+apiVersion: v2
+name: notes-api
+description: Helm chart for the notes-api tutorial service
+type: application
+version: 0.1.0          # chart version: bump when the chart changes
+appVersion: "1.0.0"     # default image tag when image.tag is empty

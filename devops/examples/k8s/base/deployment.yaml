@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: notes-api
+  labels:
+    app: notes-api
+spec:
+  replicas: 2
+  revisionHistoryLimit: 5
+  selector:
+    matchLabels:
+      app: notes-api              # must match the pod template labels below
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1                 # at most 1 extra pod during an update
+      maxUnavailable: 0           # never drop below the desired count
+  template:
+    metadata:
+      labels:
+        app: notes-api
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 10001
+        seccompProfile:
+          type: RuntimeDefault
+      containers:
+        - name: api
+          image: notes-api        # replaced by Kustomize "images:" with the real registry/tag
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8080
+          envFrom:
+            - configMapRef:
+                name: notes-api-config
+          resources:
+            requests:             # what the scheduler reserves
+              cpu: 100m
+              memory: 128Mi
+            limits:               # hard ceiling
+              memory: 256Mi
+          readinessProbe:         # gate traffic until the app can serve
+            httpGet:
+              path: /readyz
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 5
+          livenessProbe:          # restart the container if it hangs
+            httpGet:
+              path: /healthz
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+          volumeMounts:
+            - name: tmp
+              mountPath: /tmp
+      volumes:
+        - name: tmp
+          emptyDir: {}
