@@ -1439,6 +1439,218 @@ service:
     calc();
   };
 
+  // ---------- 24. Raft leader election & replication ----------
+  SIMS["raft"] = el => {
+    const ui = shell(el, "Raft: leader election and log replication",
+      `<svg viewBox="0 0 600 300" role="img" aria-label="Five Raft nodes electing a leader"><g id="dots"></g><g id="nodes"></g></svg>
+       <div class="sim-log" id="log" style="margin:0 10px 10px;height:100px"></div>`,
+      `<button class="primary" data-a="write">✍️ Client write</button><button data-a="killLeader">💥 Kill the leader</button>
+       <button data-a="killRandom">Kill a random node</button><button data-a="restart">Restart all nodes</button>`,
+      stat("term", "Current term", "0") + stat("leader", "Leader", "none") + stat("commit", "Committed entries", "0"));
+    const P = particles(ui.$("#dots"));
+    const log = ui.$("#log");
+    const say = (t, c) => { const d = document.createElement("div"); d.innerHTML = `<span style="color:${c || "inherit"}">${t}</span>`; log.appendChild(d); log.scrollTop = log.scrollHeight; while (log.children.length > 40) log.firstChild.remove(); };
+    const pos = [...Array(5)].map((_, i) => [300 + 120 * Math.cos((i / 5) * 2 * Math.PI - Math.PI / 2), 150 + 115 * Math.sin((i / 5) * 2 * Math.PI - Math.PI / 2)]);
+    const rnd = () => 2.2 + Math.random() * 1.6;
+    const nodes = pos.map((p, i) => ({ id: i, name: `S${i + 1}`, x: p[0], y: p[1], up: true, state: "follower", term: 0, votedFor: null, votes: 0, timer: rnd(), log: 0, match: [0, 0, 0, 0, 0] }));
+    let commit = 0, hb = 0;
+    const leader = () => nodes.find(n => n.up && n.state === "leader");
+    const send = (a, b, fn, color) => P.spawn([[a.x, a.y], [b.x, b.y]], { dur: 0.45, color, r: 5, onDone: () => { if (b.up && a.up) fn(); } });
+    const draw = () => {
+      ui.$("#nodes").innerHTML = nodes.map(n => {
+        const col = !n.up ? C.muted : n.state === "leader" ? C.kelp : n.state === "candidate" ? C.sand : C.sea;
+        return `<g opacity="${n.up ? 1 : 0.45}"><circle cx="${n.x}" cy="${n.y}" r="${n.state === "leader" ? 42 : 38}" style="fill:color-mix(in srgb, ${col} 20%, var(--surface));stroke:${col};stroke-width:3"/>
+          <text x="${n.x}" y="${n.y - 6}" text-anchor="middle" font-size="13" font-weight="700" style="fill:var(--text)">${n.name}${n.up ? "" : " ✕"}</text>
+          <text x="${n.x}" y="${n.y + 9}" text-anchor="middle" font-size="10" style="fill:var(--muted)">${n.up ? n.state : "down"} · t${n.term}</text>
+          <text x="${n.x}" y="${n.y + 22}" text-anchor="middle" font-size="10.5" style="fill:var(--muted)">log ${n.log}</text>
+          ${n.up && n.state === "follower" ? `<rect x="${n.x - 22}" y="${n.y + 44}" width="${Math.max(0, Math.min(1, n.timer / 3.8)) * 44}" height="4" rx="2" fill="${C.sand}" opacity=".8"/>` : ""}</g>`;
+      }).join("");
+      const L = leader();
+      ui.stat("term", Math.max(...nodes.map(n => n.term))); ui.stat("leader", L ? L.name : "none (election)"); ui.stat("commit", commit);
+    };
+    const startElection = n => {
+      n.state = "candidate"; n.term++; n.votedFor = n.id; n.votes = 1; n.timer = rnd();
+      say(`${n.name} timed out → candidate for term ${n.term}, requests votes`, C.sand);
+      const term = n.term;
+      nodes.filter(o => o !== n).forEach(o => send(n, o, () => {
+        if (term > o.term) { o.term = term; o.state = "follower"; o.votedFor = null; }
+        const upToDate = n.log >= o.log;
+        if (term === o.term && (o.votedFor === null || o.votedFor === n.id) && upToDate) {
+          o.votedFor = n.id; o.timer = rnd();
+          send(o, n, () => {
+            if (n.state === "candidate" && n.term === term) {
+              n.votes++;
+              if (n.votes >= 3) { n.state = "leader"; n.match = nodes.map(() => 0); n.match[n.id] = n.log; say(`★ ${n.name} won ${n.votes}/5 votes → leader for term ${term}`, C.kelp); hb = 1; }
+            }
+          }, C.kelp);
+        }
+      }, C.sand));
+    };
+    const heartbeat = L => {
+      nodes.filter(o => o !== L).forEach(o => {
+        const term = L.term, len = L.log;
+        send(L, o, () => {
+          if (term >= o.term) {
+            o.term = term; o.state = "follower"; o.votedFor = o.votedFor; o.timer = rnd(); o.log = len;
+            send(o, L, () => {
+              if (L.state !== "leader" || L.term !== term) return;
+              L.match[o.id] = Math.max(L.match[o.id], len);
+              L.match[L.id] = L.log;
+              const sorted = [...L.match].sort((a, b) => b - a);
+              if (sorted[2] > commit) { commit = sorted[2]; say(`entry ${commit} replicated on a majority → committed`, C.ocean); }
+            }, C.teal);
+          }
+        }, C.ocean);
+      });
+    };
+    el.addEventListener("click", e => {
+      const a = e.target.dataset.a;
+      if (a === "write") {
+        const L = leader();
+        if (!L) say("no leader right now — the client must retry", C.coral);
+        else { L.log++; L.match[L.id] = L.log; say(`client write → appended to ${L.name}'s log (entry ${L.log}), replicating…`); }
+      } else if (a === "killLeader") {
+        const L = leader();
+        if (L) { L.up = false; say(`💥 ${L.name} (leader) crashed — followers stop hearing heartbeats`, C.coral); }
+      } else if (a === "killRandom") {
+        const ups = nodes.filter(n => n.up);
+        if (ups.length > 1) { const n = ups[Math.floor(Math.random() * ups.length)]; n.up = false; say(`💥 ${n.name} crashed`, C.coral); }
+        if (nodes.filter(n => n.up).length < 3) say("⚠ fewer than 3 of 5 nodes alive: no majority, no leader can be elected (unavailable, but never inconsistent)", C.coral);
+      } else if (a === "restart") {
+        nodes.forEach(n => { if (!n.up) { n.up = true; n.state = "follower"; n.timer = rnd(); say(`${n.name} restarted as follower (term ${n.term})`); } });
+      }
+      draw();
+    });
+    draw();
+    ui.caption("Followers wait for heartbeats (yellow bar = election timer). If the timer runs out, a node asks for votes; a majority (3 of 5) makes it leader.");
+    loop(el, dt => {
+      nodes.forEach(n => { if (n.up && n.state !== "leader") { n.timer -= dt; if (n.timer <= 0) startElection(n); } });
+      hb -= dt;
+      const L = leader();
+      if (L && hb <= 0) { hb = 0.8; heartbeat(L); }
+      P.update(dt);
+      draw();
+    });
+  };
+
+  // ---------- 25. Saga vs two-phase commit ----------
+  SIMS["saga"] = el => {
+    const ui = shell(el, "Distributed transactions: saga vs two-phase commit",
+      `<div id="steps" style="padding:14px;display:grid;gap:8px"></div><div class="sim-log" id="log" style="margin:0 10px 10px;height:110px"></div>`,
+      `<label>Pattern <select data-a="mode"><option value="saga">Saga (orchestrated, with compensations)</option><option value="2pc">Two-phase commit</option></select></label>
+       <label>Make it fail at <select data-a="fail"><option value="">nothing (happy path)</option><option value="1">Payment</option><option value="2">Inventory</option><option value="3">Shipping</option></select></label>
+       <button class="primary" data-a="run">▶ Run transaction</button>`);
+    const log = ui.$("#log");
+    const say = (t, c) => { const d = document.createElement("div"); d.innerHTML = `<span style="color:${c || "inherit"}">${t}</span>`; log.appendChild(d); log.scrollTop = log.scrollHeight; };
+    const saga = [["Order service", "Create order (PENDING)", "Cancel order"], ["Payment service", "Charge card", "Refund card"], ["Inventory service", "Reserve items", "Release items"], ["Shipping service", "Book courier", "Cancel courier"], ["Order service", "Mark order CONFIRMED", ""]];
+    const tpc = [["Payment service"], ["Inventory service"], ["Shipping service"]];
+    let mode = "saga", running = false, timers = [];
+    const later = (ms, fn) => timers.push(setTimeout(() => { if (el.isConnected) fn(); }, ms));
+    const render = st => {
+      const rows = mode === "saga" ? saga : tpc;
+      ui.$("#steps").innerHTML = rows.map((r, i) => {
+        const s = (st && st[i]) || { k: "idle", t: mode === "saga" ? r[1] : "waiting" };
+        const col = { idle: "var(--border)", run: C.sand, ok: C.kelp, fail: C.coral, undo: C.violet, lock: C.sand }[s.k];
+        return `<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:10px;border:2px solid ${col};background:var(--surface);transition:all .3s">
+          <b style="width:150px;font-size:13px">${r[0]}</b><span style="flex:1;font-size:13px">${s.t}</span>
+          <b style="font-size:12px;color:${col === "var(--border)" ? "var(--muted)" : col}">${{ idle: "", run: "working…", ok: "✓ done", fail: "✕ failed", undo: "↩ compensated", lock: "🔒 prepared (locked)" }[s.k]}</b></div>`;
+      }).join("");
+    };
+    const runSaga = fail => {
+      const st = saga.map(r => ({ k: "idle", t: r[1] }));
+      let i = 0;
+      const fwd = () => {
+        if (i >= saga.length) { say("✓ Saga completed: every local transaction committed.", C.kelp); running = false; ui.caption("Each step committed locally right away — no locks held across services."); return; }
+        st[i] = { k: "run", t: saga[i][1] }; render(st);
+        later(700, () => {
+          if (String(i) === fail) {
+            st[i] = { k: "fail", t: saga[i][1] }; render(st); say(`✕ ${saga[i][0]}: ${saga[i][1]} failed → run compensations in reverse`, C.coral);
+            let j = i - 1;
+            const back = () => {
+              if (j < 0) { say("Saga rolled back: system is consistent again (eventually).", C.violet); running = false; ui.caption("Compensations <b>semantically undo</b> earlier steps (a refund, not a time machine). In between, other users could briefly see the intermediate state."); return; }
+              st[j] = { k: "undo", t: saga[j][2] }; render(st); say(`↩ ${saga[j][0]}: ${saga[j][2]}`, C.violet);
+              j--; later(650, back);
+            };
+            later(500, back);
+            return;
+          }
+          st[i] = { k: "ok", t: saga[i][1] }; render(st); say(`✓ ${saga[i][0]}: ${saga[i][1]} (committed locally)`, C.kelp);
+          i++; later(250, fwd);
+        });
+      };
+      fwd();
+    };
+    const run2pc = fail => {
+      const st = tpc.map(() => ({ k: "idle", t: "waiting" }));
+      say("Coordinator → all participants: PREPARE");
+      tpc.forEach((r, i) => later(400 + i * 350, () => {
+        if (String(i + 1) === fail) { st[i] = { k: "fail", t: "votes NO (can't commit)" }; say(`✕ ${r[0]} votes NO`, C.coral); }
+        else { st[i] = { k: "lock", t: "votes YES, holds locks, waits for decision" }; say(`${r[0]} votes YES and keeps its locks`); }
+        render(st);
+      }));
+      later(400 + tpc.length * 350 + 600, () => {
+        const abort = fail !== "";
+        say(abort ? "Coordinator: a participant voted NO → ABORT everyone" : "Coordinator: all voted YES → COMMIT", abort ? C.coral : C.kelp);
+        tpc.forEach((r, i) => later(i * 300, () => {
+          st[i] = abort ? { k: st[i].k === "fail" ? "fail" : "undo", t: "aborted, locks released" } : { k: "ok", t: "committed, locks released" };
+          render(st);
+          if (i === tpc.length - 1) { running = false; ui.caption(abort ? "Atomic: nobody committed. Note how prepared participants held locks while waiting — if the coordinator crashes now, they stay blocked." : "Atomic and isolated, but every participant held locks for the whole protocol — slow, and blocking if the coordinator fails."); }
+        }));
+      });
+    };
+    el.addEventListener("click", e => {
+      if (e.target.dataset.a !== "run" || running) return;
+      running = true; log.innerHTML = "";
+      const fail = ui.$('[data-a="fail"]').value;
+      mode === "saga" ? runSaga(fail) : run2pc(fail);
+    });
+    ui.$('[data-a="mode"]').addEventListener("change", e => { if (running) return; mode = e.target.value; render(); log.innerHTML = ""; ui.caption(mode === "saga" ? "A saga is a sequence of local transactions; on failure, compensating actions undo the completed ones." : "Two-phase commit: everyone prepares (and locks), then the coordinator tells all to commit or abort."); });
+    render();
+    ui.caption("A saga is a sequence of local transactions; on failure, compensating actions undo the completed ones. Pick a failure and run it.");
+  };
+
+  // ---------- 26. Bloom filter ----------
+  SIMS["bloom"] = el => {
+    const M = 32, K = 3;
+    const ui = shell(el, `Bloom filter (${M} bits, ${K} hash functions)`,
+      `<div style="padding:14px"><div id="bits" style="display:grid;grid-template-columns:repeat(16,1fr);gap:4px"></div>
+       <div id="added" style="margin-top:12px;font-size:12.5px;color:var(--muted)"></div></div>`,
+      `<input type="text" data-a="word" value="kafka" aria-label="Word" style="font:inherit;font-size:14px;padding:6px 10px;border-radius:999px;border:1px solid var(--border);background:var(--surface);color:var(--text);width:140px">
+       <button class="primary" data-a="add">Add</button><button data-a="check">Check membership</button>
+       <button data-a="bulk">Add 5 random words</button><button data-a="reset">Reset</button>`,
+      stat("n", "Items added", "0") + stat("set", "Bits set", `0/${M}`) + stat("fp", "False-positive chance", "0%"));
+    let bits = new Array(M).fill(0), items = new Set(), hl = [], hlColor = C.sea;
+    const hash = (s, seed) => { let h = 2166136261 ^ seed; for (const ch of s) { h ^= ch.charCodeAt(0); h = Math.imul(h, 16777619); } h ^= h >>> 13; h = Math.imul(h, 0x5bd1e995); h ^= h >>> 15; return (h >>> 0) % M; };
+    const idx = w => [...new Set([0, 1, 2].map(i => hash(w.toLowerCase(), i * 7919 + 17)))];
+    const render = () => {
+      ui.$("#bits").innerHTML = bits.map((b, i) => `<div style="text-align:center;padding:8px 0;border-radius:6px;font:600 12px var(--mono);
+        border:2px solid ${hl.includes(i) ? hlColor : "var(--border)"};background:${b ? "color-mix(in srgb," + C.teal + " 35%, var(--surface))" : "var(--surface)"};
+        transform:${hl.includes(i) ? "scale(1.12)" : "none"};transition:all .25s">${b}<div style="font-size:9px;color:var(--muted)">${i}</div></div>`).join("");
+      const n = items.size, setCount = bits.filter(Boolean).length;
+      ui.stat("n", n); ui.stat("set", `${setCount}/${M}`);
+      ui.stat("fp", `${(Math.pow(1 - Math.exp(-K * n / M), K) * 100).toFixed(1)}%`);
+      ui.$("#added").textContent = n ? `In the set: ${[...items].join(", ")}` : "The set is empty.";
+    };
+    const word = () => ui.$('[data-a="word"]').value.trim();
+    const add = w => { if (!w) return; const ix = idx(w); ix.forEach(i => { bits[i] = 1; }); items.add(w.toLowerCase()); hl = ix; hlColor = C.sea; render(); ui.caption(`Added “${w}”: hashes → bits ${ix.join(", ")} set to 1.`); };
+    const words = ["redis", "raft", "shard", "cache", "queue", "paxos", "kafka", "nginx", "lambda", "vector", "token", "docker", "helm", "etcd", "gossip", "quorum", "replica", "bucket"];
+    el.addEventListener("click", e => {
+      const a = e.target.dataset.a;
+      if (a === "add") add(word());
+      else if (a === "check") {
+        const w = word(); if (!w) return;
+        const ix = idx(w), all = ix.every(i => bits[i]);
+        hl = ix; hlColor = all ? C.sand : C.coral; render();
+        if (!all) ui.caption(`“${w}”: bit ${ix.find(i => !bits[i])} is 0 → <b>definitely not</b> in the set. (No false negatives, ever.)`);
+        else if (items.has(w.toLowerCase())) ui.caption(`“${w}”: bits ${ix.join(", ")} are all 1 → <b>probably</b> in the set (and it really is).`);
+        else ui.caption(`“${w}”: bits ${ix.join(", ")} are all 1 → “probably in the set”, but it was never added: a <b style="color:${C.coral}">false positive</b>! Other words set those bits.`);
+      } else if (a === "bulk") { for (let i = 0; i < 5; i++) add(words[Math.floor(Math.random() * words.length)] + (Math.random() < 0.3 ? Math.floor(Math.random() * 9) : "")); ui.caption("As the filter fills up, more bits are 1 and the false-positive chance rises. Size m for your expected n."); }
+      else if (a === "reset") { bits = new Array(M).fill(0); items = new Set(); hl = []; render(); ui.caption("Empty filter. Note: you can't remove a single item from a plain Bloom filter."); }
+    });
+    render();
+    ui.caption("Type a word and Add it, then Check other words. Each word sets 3 bits chosen by 3 hash functions.");
+  };
+
   window.SIMS = {
     mount(el) {
       const fn = SIMS[el.dataset.sim];

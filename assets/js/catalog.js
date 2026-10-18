@@ -9,6 +9,20 @@ window.CATALOG = [
     ]
   },
   {
+    id: "prep",
+    title: "Interview Prep: Mocks, Mistakes, Rubric & Cheat Sheet",
+    blurb: "See full mock interviews, avoid the classic mistakes, grade yourself, and review all problems on one page.",
+    kind: "lesson",
+    items: [
+      { path: "interview-prep/01-mock-interview-url-shortener", title: "Mock Interview: URL Shortener", desc: "Full mid-level transcript with coaching notes.", mins: 15, sim: true },
+      { path: "interview-prep/02-mock-interview-rag-assistant", title: "Mock Interview: RAG Assistant", desc: "AI engineer interview, including a recovery from a weak answer.", mins: 15, sim: true },
+      { path: "interview-prep/03-mock-interview-chat-system", title: "Mock Interview: Chat (Hard Pushback)", desc: "Senior interview: defending, adapting, disagreeing politely.", mins: 15, sim: true },
+      { path: "interview-prep/04-common-mistakes", title: "20 Common Mistakes", desc: "What candidates do wrong and what to say instead.", mins: 10, sim: true },
+      { path: "interview-prep/05-scoring-rubric", title: "Scoring Rubric", desc: "How interviewers grade, junior to staff, with a score sheet.", mins: 8, sim: true },
+      { path: "interview-prep/06-cheat-sheet", title: "Night-Before Cheat Sheet", desc: "All 54 problems: core insight, must-mention, trap.", mins: 12 }
+    ]
+  },
+  {
     id: "fund-systems",
     title: "Fundamentals: Distributed Systems",
     blurb: "Short animated lessons on the building blocks every design uses.",
@@ -24,7 +38,10 @@ window.CATALOG = [
       { path: "fundamentals/systems/08-message-queues", title: "Message Queues", desc: "Async work, buffering spikes, delivery guarantees.", mins: 7, sim: true },
       { path: "fundamentals/systems/09-reliability-patterns", title: "Reliability Patterns", desc: "Timeouts, retries, circuit breakers, rate limits, SLOs.", mins: 9, sim: true },
       { path: "fundamentals/systems/10-back-of-envelope-estimation", title: "Back-of-Envelope Estimation", desc: "QPS, storage, bandwidth in two minutes.", mins: 6, sim: true },
-      { path: "fundamentals/systems/11-networking-cdn-and-apis", title: "Networking, CDNs & APIs", desc: "Life of a request; REST, gRPC, WebSockets, SSE.", mins: 8, sim: true }
+      { path: "fundamentals/systems/11-networking-cdn-and-apis", title: "Networking, CDNs & APIs", desc: "Life of a request; REST, gRPC, WebSockets, SSE.", mins: 8, sim: true },
+      { path: "fundamentals/systems/12-consensus-and-raft", title: "Consensus & Raft", desc: "Leader election, log replication, majorities.", mins: 9, sim: true },
+      { path: "fundamentals/systems/13-distributed-transactions-and-sagas", title: "Distributed Transactions & Sagas", desc: "Two-phase commit vs sagas with compensations.", mins: 9, sim: true },
+      { path: "fundamentals/systems/14-bloom-filters", title: "Bloom Filters & Sketches", desc: "Probably yes, definitely no — plus HyperLogLog and friends.", mins: 7, sim: true }
     ]
   },
   {

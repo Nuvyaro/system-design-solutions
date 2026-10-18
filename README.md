@@ -15,7 +15,7 @@ Everything here is also an animated website: open `index.html` through GitHub Pa
 - **Enable GitHub Pages:** repository **Settings → Pages → Build and deployment → Source: Deploy from a branch**, choose the branch (e.g. `main`) and folder **`/ (root)`**, then **Save**. No build step is needed.
 - **Run locally:** `python3 -m http.server 8000` in the repo root, then open http://localhost:8000.
 
-Site features: 34 interactive simulations, animated diagrams, practice mode with a 45-minute timer, tap-to-reveal follow-up questions, progress tracking (stored in your browser), search, and dark mode. The Markdown files are the single source of truth: the site renders them directly, so anything you edit here shows up on the site.
+Site features: 40+ interactive simulations, animated diagrams, practice mode with a 45-minute timer, tap-to-reveal follow-up questions, progress tracking (stored in your browser), search, and dark mode. The Markdown files are the single source of truth: the site renders them directly, so anything you edit here shows up on the site.
 
 Every solution follows the same structure so you can practice a repeatable approach:
 
@@ -30,6 +30,17 @@ Every solution follows the same structure so you can practice a repeatable appro
 9. Follow-up interview questions with model answers
 
 Start with the [interview framework](framework.md) — it explains how to run a 45–60 minute interview and has the reference numbers used in the estimates.
+
+## Interview Prep
+
+| Guide | What you get |
+|-------|--------------|
+| [Mock interview: URL shortener](interview-prep/01-mock-interview-url-shortener.md) | Full mid-level transcript with coaching notes |
+| [Mock interview: RAG assistant](interview-prep/02-mock-interview-rag-assistant.md) | AI engineer interview, including recovering from a weak answer |
+| [Mock interview: chat system](interview-prep/03-mock-interview-chat-system.md) | Senior interview with hard pushback and polite disagreement |
+| [20 common mistakes](interview-prep/04-common-mistakes.md) | What candidates do wrong and exactly what to say instead |
+| [Scoring rubric](interview-prep/05-scoring-rubric.md) | How interviewers grade, junior → staff, with a score sheet |
+| [Night-before cheat sheet](interview-prep/06-cheat-sheet.md) | All 54 problems: core insight, must-mention components, trap |
 
 ## Fundamentals: Distributed Systems
 
@@ -46,6 +57,9 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 9 | [Reliability Patterns](fundamentals/systems/09-reliability-patterns.md) | Circuit breaker, token bucket |
 | 10 | [Back-of-Envelope Estimation](fundamentals/systems/10-back-of-envelope-estimation.md) | Live calculator |
 | 11 | [Networking, CDNs & APIs](fundamentals/systems/11-networking-cdn-and-apis.md) | Life of a request |
+| 12 | [Consensus & Raft](fundamentals/systems/12-consensus-and-raft.md) | 5-node Raft: kill the leader, watch the election |
+| 13 | [Distributed Transactions & Sagas](fundamentals/systems/13-distributed-transactions-and-sagas.md) | Saga compensations vs two-phase commit |
+| 14 | [Bloom Filters & Sketches](fundamentals/systems/14-bloom-filters.md) | Add/check words, see false positives |
 
 ## Fundamentals: AI & ML Systems
 
