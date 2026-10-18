@@ -40,7 +40,8 @@ window.CATALOG = [
       { path: "fundamentals/ai/05-rag-explained", title: "RAG Explained", desc: "Retrieve, then generate — with citations.", mins: 8, sim: true },
       { path: "fundamentals/ai/06-recommendation-funnel", title: "The Recommendation Funnel", desc: "Retrieval → ranking → re-ranking.", mins: 7, sim: true },
       { path: "fundamentals/ai/07-ai-agents-explained", title: "AI Agents", desc: "The think → act → observe loop and how to make it safe.", mins: 7, sim: true },
-      { path: "fundamentals/ai/08-evaluation-metrics", title: "Evaluation Metrics", desc: "Precision, recall, thresholds, ranking metrics, LLM evals.", mins: 8, sim: true }
+      { path: "fundamentals/ai/08-evaluation-metrics", title: "Evaluation Metrics", desc: "Precision, recall, thresholds, ranking metrics, LLM evals.", mins: 8, sim: true },
+      { path: "fundamentals/ai/09-how-genai-changes-system-design", title: "How GenAI Changes System Design", desc: "Tokens, latency, evals, guardrails — plus a cost calculator.", mins: 9, sim: true }
     ]
   },
   {
@@ -122,7 +123,17 @@ window.CATALOG = [
       { path: "ai-system-design/13-ad-click-prediction", title: "Ad Click Prediction", desc: "CTR models, calibration, auctions.", mins: 20 },
       { path: "ai-system-design/14-image-generation-service", title: "Image Generation Service", desc: "Diffusion serving, GPU scheduling, safety.", mins: 20 },
       { path: "ai-system-design/15-voice-assistant", title: "Real-time Voice Assistant", desc: "Streaming speech pipeline, barge-in.", mins: 20 },
-      { path: "ai-system-design/16-document-extraction", title: "Document Extraction", desc: "OCR, layout models, grounded extraction.", mins: 20 }
+      { path: "ai-system-design/16-document-extraction", title: "Document Extraction", desc: "OCR, layout models, grounded extraction.", mins: 20 },
+      { path: "ai-system-design/17-llm-gateway", title: "LLM Gateway", desc: "Routing, fallback, token budgets, caching.", mins: 20 },
+      { path: "ai-system-design/18-ai-answer-engine", title: "AI Answer Engine (Perplexity)", desc: "Live web retrieval with citations.", mins: 20 },
+      { path: "ai-system-design/19-deep-research-agent", title: "Deep Research Multi-Agent", desc: "Orchestrator-worker agents, long tasks.", mins: 25 },
+      { path: "ai-system-design/20-autonomous-coding-agent", title: "Autonomous Coding Agent", desc: "Cloud sandboxes, tests, PRs.", mins: 25 },
+      { path: "ai-system-design/21-ai-customer-support-agent", title: "AI Customer Support Agent", desc: "Policy engine, tools, escalation.", mins: 20 },
+      { path: "ai-system-design/22-mcp-tool-platform", title: "MCP Tool Platform", desc: "Agent tools with auth, policy, audit.", mins: 20 },
+      { path: "ai-system-design/23-llm-fine-tuning-platform", title: "LLM Fine-Tuning Platform", desc: "LoRA, DPO, eval gates, deployment.", mins: 25 },
+      { path: "ai-system-design/24-distributed-llm-training", title: "Distributed LLM Training", desc: "Parallelism, failures, checkpoints.", mins: 25 },
+      { path: "ai-system-design/25-llm-pretraining-data-pipeline", title: "LLM Pretraining Data Pipeline", desc: "Filtering, dedup, mixtures.", mins: 20 },
+      { path: "ai-system-design/26-ai-meeting-assistant", title: "AI Meeting Assistant", desc: "Live captions, summaries, action items.", mins: 20 }
     ]
   }
 ];

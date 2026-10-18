@@ -1402,6 +1402,43 @@ service:
     load("k8s");
   };
 
+  // ---------- 23. LLM cost & capacity calculator ----------
+  SIMS["llm-cost"] = el => {
+    const ui = shell(el, "LLM cost & capacity calculator",
+      `<div style="padding:14px"><div class="calc">
+        <label>Requests per day<input type="number" data-k="req" value="1000000" min="0"></label>
+        <label>Input tokens per request<input type="number" data-k="tin" value="3000" min="0"></label>
+        <label>Output tokens per request<input type="number" data-k="tout" value="400" min="0"></label>
+        <label>$ per 1M input tokens (example)<input type="number" data-k="pin" value="3" min="0" step="0.05"></label>
+        <label>$ per 1M output tokens (example)<input type="number" data-k="pout" value="15" min="0" step="0.05"></label>
+        <label>Prompt-cache hit rate on input (%)<input type="number" data-k="cache" value="50" min="0" max="100"></label>
+        <label>Cached input discount (%)<input type="number" data-k="disc" value="90" min="0" max="100"></label>
+        <label>Output tokens/s per stream<input type="number" data-k="tps" value="60" min="1"></label>
+      </div><div class="calc-out" id="out"></div></div>`);
+    const calc = () => {
+      const g = k => Math.max(0, +ui.$(`[data-k="${k}"]`).value || 0);
+      const req = g("req"), tin = g("tin"), tout = g("tout");
+      const cacheShare = Math.min(1, g("cache") / 100), disc = Math.min(1, g("disc") / 100);
+      const inTok = req * tin, outTok = req * tout;
+      const inCost = (inTok / 1e6) * g("pin") * (1 - cacheShare * disc);
+      const outCost = (outTok / 1e6) * g("pout");
+      const day = inCost + outCost;
+      const qps = req / 86400, peak = qps * 3;
+      const genSec = tout / g("tps");
+      const concurrent = peak * genSec;
+      const money = v => v >= 1e6 ? `$${(v / 1e6).toFixed(2)}M` : v >= 1e3 ? `$${(v / 1e3).toFixed(1)}k` : `$${v.toFixed(2)}`;
+      ui.$("#out").innerHTML = [
+        [money(day), "per day"], [money(day * 30), "per month"], [`$${(day / Math.max(1, req) * 1000).toFixed(2)}`, "per 1,000 requests"],
+        [`${Math.round((outCost / Math.max(day, 1e-9)) * 100)}%`, "of cost from output tokens"],
+        [`${fmt(peak)}/s`, "peak requests (≈3× avg)"], [fmt(concurrent), "concurrent streams at peak"],
+        [`${genSec.toFixed(1)} s`, "generation time per answer (+ TTFT)"], [fmt(inTok + outTok), "tokens per day"]
+      ].map(([v, l]) => `<div><b>${v}</b><span>${l}</span></div>`).join("");
+      ui.caption(`Levers: shorter prompts, fewer retrieved chunks, capped output length, higher cache hit rate, and routing easy requests to a cheaper model. Concurrent streams × KV-cache per stream sizes your GPU fleet if you self-host.`);
+    };
+    el.addEventListener("input", calc);
+    calc();
+  };
+
   window.SIMS = {
     mount(el) {
       const fn = SIMS[el.dataset.sim];

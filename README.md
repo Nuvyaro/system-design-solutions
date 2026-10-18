@@ -15,7 +15,7 @@ Everything here is also an animated website: open `index.html` through GitHub Pa
 - **Enable GitHub Pages:** repository **Settings → Pages → Build and deployment → Source: Deploy from a branch**, choose the branch (e.g. `main`) and folder **`/ (root)`**, then **Save**. No build step is needed.
 - **Run locally:** `python3 -m http.server 8000` in the repo root, then open http://localhost:8000.
 
-Site features: 33 interactive simulations, animated diagrams, practice mode with a 45-minute timer, tap-to-reveal follow-up questions, progress tracking (stored in your browser), search, and dark mode. The Markdown files are the single source of truth: the site renders them directly, so anything you edit here shows up on the site.
+Site features: 34 interactive simulations, animated diagrams, practice mode with a 45-minute timer, tap-to-reveal follow-up questions, progress tracking (stored in your browser), search, and dark mode. The Markdown files are the single source of truth: the site renders them directly, so anything you edit here shows up on the site.
 
 Every solution follows the same structure so you can practice a repeatable approach:
 
@@ -59,6 +59,7 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 6 | [The Recommendation Funnel](fundamentals/ai/06-recommendation-funnel.md) | 1 billion items → 20 |
 | 7 | [AI Agents](fundamentals/ai/07-ai-agents-explained.md) | Agent loop + prompt injection |
 | 8 | [Evaluation Metrics](fundamentals/ai/08-evaluation-metrics.md) | Drag the threshold: precision vs recall |
+| 9 | [How GenAI Changes System Design](fundamentals/ai/09-how-genai-changes-system-design.md) | LLM cost & capacity calculator |
 
 ## Classic System Design
 
@@ -113,6 +114,16 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 14 | [Text-to-Image Generation Service](ai-system-design/14-image-generation-service.md) | Diffusion serving, step distillation, GPU scheduling, image safety |
 | 15 | [Real-time Voice AI Assistant](ai-system-design/15-voice-assistant.md) | Streaming ASR→LLM→TTS, latency budget, barge-in, turn-taking |
 | 16 | [Document Intelligence & Extraction](ai-system-design/16-document-extraction.md) | OCR + layout, VLM extraction, grounding, calibrated human review |
+| 17 | [LLM Gateway (AI Gateway)](ai-system-design/17-llm-gateway.md) | Provider routing/fallback, token & $ quotas, semantic caching, cost attribution |
+| 18 | [AI Answer Engine (Perplexity)](ai-system-design/18-ai-answer-engine.md) | Query planning, live web retrieval, cited generation, latency budget |
+| 19 | [Deep Research Multi-Agent System](ai-system-design/19-deep-research-agent.md) | Orchestrator–worker agents, durable execution, findings store, verification |
+| 20 | [Autonomous Coding Agent Platform](ai-system-design/20-autonomous-coding-agent.md) | microVM sandboxes, egress control, agent loop, steerable long runs |
+| 21 | [AI Customer Support Agent](ai-system-design/21-ai-customer-support-agent.md) | LLM + deterministic policy engine, scoped tools, human handoff, simulated-customer evals |
+| 22 | [Tool Integration Platform (MCP)](ai-system-design/22-mcp-tool-platform.md) | Model Context Protocol, delegated OAuth, policy engine, injection defenses |
+| 23 | [LLM Fine-Tuning & Alignment Platform](ai-system-design/23-llm-fine-tuning-platform.md) | When to fine-tune, LoRA/QLoRA, DPO/RLHF, GPU scheduling, eval gates |
+| 24 | [Distributed LLM Training Infrastructure](ai-system-design/24-distributed-llm-training.md) | 6ND compute math, TP/PP/DP/FSDP, failures & checkpointing, stability |
+| 25 | [LLM Pretraining Data Pipeline](ai-system-design/25-llm-pretraining-data-pipeline.md) | Extraction, MinHash dedup, quality classifiers, PII, decontamination, mixtures |
+| 26 | [AI Meeting Assistant](ai-system-design/26-ai-meeting-assistant.md) | Streaming ASR + diarization, hierarchical summarization, permissioned search |
 
 ## DevOps: Docker, Kubernetes & CI/CD
 
