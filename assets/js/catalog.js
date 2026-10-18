@@ -23,6 +23,21 @@ window.CATALOG = [
     ]
   },
   {
+    id: "design",
+    title: "Software Design Principles (Code Simplicity)",
+    blurb: "The laws of simple, maintainable software — summarized from Max Kanat-Alexander's Code Simplicity and applied to system design.",
+    kind: "lesson",
+    items: [
+      { path: "software-design/01-purpose-and-the-equation-of-design", title: "Purpose & the Equation of Design", desc: "Help people; maintenance outweighs build effort.", mins: 9, sim: true },
+      { path: "software-design/02-change-and-the-three-flaws", title: "Change & the Three Flaws", desc: "YAGNI, rigid design, over-engineering, incremental design.", mins: 10, sim: true },
+      { path: "software-design/03-defects-small-changes-and-dry", title: "Defects, Small Changes & DRY", desc: "Defect probability, evidence before fixing, one source of truth.", mins: 8 },
+      { path: "software-design/04-simplicity-readability-and-consistency", title: "Simplicity, Readability & Consistency", desc: "Simple pieces, consistency, names, why-comments.", mins: 9 },
+      { path: "software-design/05-complexity-and-how-to-tame-it", title: "Complexity & How to Tame It", desc: "Sources of complexity, technology tests, small-step redesign, rewrites.", mins: 11, sim: true },
+      { path: "software-design/06-testing-and-the-six-laws", title: "Testing & the Six Laws", desc: "Law of Testing plus all laws and rules on one page.", mins: 8, sim: true },
+      { path: "software-design/07-applying-simplicity-to-system-design", title: "Applying Simplicity to System Design", desc: "The laws as architecture and interview guidance.", mins: 10 }
+    ]
+  },
+  {
     id: "fund-systems",
     title: "Fundamentals: Distributed Systems",
     blurb: "Short animated lessons on the building blocks every design uses.",

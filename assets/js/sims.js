@@ -1724,6 +1724,90 @@ service:
     reset();
   };
 
+  // ---------- 28. Equation of software design over time ----------
+  SIMS["design-equation"] = el => {
+    const ui = shell(el, "Quick hack vs. designed change, over time",
+      `<svg viewBox="0 0 600 260" role="img" aria-label="Cumulative effort of two designs over time"><g id="chart"></g></svg>`,
+      `<label>Months <input type="range" min="6" max="60" step="1" value="24" data-a="months"> <span data-v="months">24</span></label>
+       <label>Hack's maintenance growth <input type="range" min="0" max="20" step="1" value="8" data-a="growth"> <span data-v="growth">8</span>%/month</label>
+       <label>Value per month <input type="range" min="1" max="20" step="1" value="8" data-a="value"> <span data-v="value">8</span></label>`,
+      stat("cross", "Designed version cheaper after", "–") + stat("dHack", "D (hack) at end", "–") + stat("dDes", "D (designed) at end", "–"));
+    const draw = () => {
+      const months = +ui.$('[data-a="months"]').value, g = +ui.$('[data-a="growth"]').value / 100, v = +ui.$('[data-a="value"]').value;
+      ui.$('[data-v="months"]').textContent = months; ui.$('[data-v="growth"]').textContent = Math.round(g * 100); ui.$('[data-v="value"]').textContent = v;
+      // effort units: hack costs 2 to build, maintenance starts at 1/month and grows; designed costs 6, maintenance starts at 1 and shrinks
+      let hack = [2], des = [6], mH = 1, mD = 1, cross = null;
+      for (let m = 1; m <= months; m++) {
+        hack.push(hack[m - 1] + mH); des.push(des[m - 1] + mD);
+        mH *= 1 + g; mD = Math.max(0.05, mD * 0.85);
+        if (cross === null && des[m] < hack[m]) cross = m;
+      }
+      const value = m => 5 + v * m; // value now (5) + future value accumulated
+      const maxY = Math.max(hack[months], des[months]) * 1.05;
+      const X = m => 50 + (m / months) * 530, Y = y => 225 - (y / maxY) * 200;
+      const path = arr => arr.map((y, m) => `${m ? "L" : "M"}${X(m).toFixed(1)},${Y(y).toFixed(1)}`).join(" ");
+      let grid = "";
+      for (let i = 0; i <= 4; i++) { const y = (maxY / 4) * i; grid += `<line x1="50" x2="580" y1="${Y(y)}" y2="${Y(y)}" style="stroke:var(--border)"/><text x="44" y="${Y(y) + 4}" text-anchor="end" font-size="10" style="fill:var(--muted)">${Math.round(y)}</text>`; }
+      ui.$("#chart").innerHTML = grid +
+        `<text x="315" y="252" text-anchor="middle" font-size="11" style="fill:var(--muted)">months after the change</text>
+         <text x="14" y="125" font-size="11" style="fill:var(--muted)" transform="rotate(-90 14 125)">total effort spent</text>
+         <path d="${path(hack)}" fill="none" stroke="${C.coral}" stroke-width="3"/>
+         <path d="${path(des)}" fill="none" stroke="${C.kelp}" stroke-width="3"/>
+         ${cross ? `<line x1="${X(cross)}" x2="${X(cross)}" y1="25" y2="225" style="stroke:var(--text);stroke-dasharray:4 4"/><text x="${X(cross) + 5}" y="38" font-size="11" style="fill:var(--text)">crossover</text>` : ""}
+         <rect x="60" y="14" width="12" height="4" fill="${C.coral}"/><text x="78" y="20" font-size="11" style="fill:var(--text)">Quick hack (cheap to build, maintenance grows)</text>
+         <rect x="330" y="14" width="12" height="4" fill="${C.kelp}"/><text x="348" y="20" font-size="11" style="fill:var(--text)">Designed (costlier to build, maintenance shrinks)</text>`;
+      const dH = value(months) / hack[months], dD = value(months) / des[months];
+      ui.stat("cross", cross ? `${cross} month${cross === 1 ? "" : "s"}` : "not within this horizon");
+      ui.stat("dHack", dH.toFixed(2)); ui.stat("dDes", dD.toFixed(2));
+      ui.caption(`D = (value now + future value) / (implementation effort + maintenance effort). Early on the hack looks better; ${cross ? `after ${cross} months the designed change has cost less in total and keeps getting more desirable.` : "extend the horizon or raise the hack's maintenance growth to see the crossover."} Over a long life, maintenance dominates the equation.`);
+    };
+    el.addEventListener("input", draw);
+    draw();
+  };
+
+  // ---------- 29. Complexity growth with features ----------
+  SIMS["complexity-growth"] = el => {
+    const ui = shell(el, "Why each new feature costs more: interactions",
+      `<svg viewBox="0 0 600 300" role="img" aria-label="Features and their interactions"><g id="g"></g></svg>`,
+      `<label>Features <input type="range" min="2" max="24" step="1" value="10" data-a="n"> <span data-v="n">10</span></label>
+       <button data-m="poor" aria-pressed="true">No design: everything touches everything</button>
+       <button data-m="good" aria-pressed="false">Simple pieces behind clear interfaces</button>`,
+      stat("edges", "Interactions to keep working", "–") + stat("next", "Extra interactions for the next feature", "–"));
+    let mode = "poor";
+    const draw = () => {
+      const n = +ui.$('[data-a="n"]').value; ui.$('[data-v="n"]').textContent = n;
+      const cx = 180, cy = 150, R = 115;
+      const pts = [...Array(n)].map((_, i) => [cx + R * Math.cos((i / n) * 2 * Math.PI - Math.PI / 2), cy + R * Math.sin((i / n) * 2 * Math.PI - Math.PI / 2)]);
+      let lines = "", edges = 0;
+      if (mode === "poor") {
+        for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++) { lines += `<line x1="${pts[i][0]}" y1="${pts[i][1]}" x2="${pts[j][0]}" y2="${pts[j][1]}" stroke="${C.coral}" stroke-opacity=".35" stroke-width="1.2"/>`; edges++; }
+      } else {
+        // features talk to a small set of shared modules (core, storage, UI) through interfaces
+        const hubs = [[cx, cy - 30], [cx - 30, cy + 25], [cx + 30, cy + 25]];
+        hubs.forEach((h, k) => { lines += `<circle cx="${h[0]}" cy="${h[1]}" r="12" fill="${C.sea}" opacity=".85"/><text x="${h[0]}" y="${h[1] + 4}" text-anchor="middle" font-size="9" fill="#fff">${["core", "data", "ui"][k]}</text>`; });
+        pts.forEach((p, i) => { const h = hubs[i % 3]; lines = `<line x1="${p[0]}" y1="${p[1]}" x2="${h[0]}" y2="${h[1]}" stroke="${C.kelp}" stroke-opacity=".7" stroke-width="1.5"/>` + lines; edges++; });
+        edges += 3;
+      }
+      const next = mode === "poor" ? n : 1;
+      const dots = pts.map(p => `<circle cx="${p[0]}" cy="${p[1]}" r="8" style="fill:var(--surface);stroke:${mode === "poor" ? C.coral : C.kelp};stroke-width:2.5"/>`).join("");
+      ui.$("#g").innerHTML = lines + dots +
+        `<text x="340" y="56" font-size="14" font-weight="700" style="fill:var(--text)">${mode === "poor" ? "Every feature talks to" : "Each feature uses only"}</text>
+         <text x="340" y="74" font-size="14" font-weight="700" style="fill:var(--text)">${mode === "poor" ? "every other feature" : "a few simple modules"}</text>
+         <text x="340" y="100" font-size="13" style="fill:var(--muted)">${n} features → <tspan font-weight="700" style="fill:var(--text)">${edges}</tspan> interactions</text>
+         <text x="340" y="125" font-size="13" style="fill:var(--muted)">Adding feature #${n + 1}: <tspan font-weight="700" style="fill:var(--text)">+${next}</tspan> interaction${next === 1 ? "" : "s"}</text>
+         <text x="340" y="160" font-size="12" style="fill:var(--muted)">${mode === "poor" ? "Grows like n² — the 'never-shipping product'." : "Grows roughly linearly — design keeps the cost"}</text>
+         <text x="340" y="178" font-size="12" style="fill:var(--muted)">${mode === "poor" ? "" : "of the next feature small."}</text>`;
+      ui.stat("edges", edges); ui.stat("next", `+${next}`);
+      ui.caption(mode === "poor" ? "Without design, a new feature must be checked against every existing one, so each feature costs more than the last." : "With simple pieces and clear interfaces, a new feature mostly touches one module — complexity still grows, but slowly.");
+    };
+    el.addEventListener("click", e => {
+      const m = e.target.dataset.m; if (!m) return;
+      mode = m; ui.$$("[data-m]").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.m === m))); draw();
+    });
+    ui.$('[data-a="n"]').addEventListener("input", draw);
+    draw();
+  };
+
   window.SIMS = {
     mount(el) {
       const fn = SIMS[el.dataset.sim];

@@ -42,6 +42,20 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | [Scoring rubric](interview-prep/05-scoring-rubric.md) | How interviewers grade, junior → staff, with a score sheet |
 | [Night-before cheat sheet](interview-prep/06-cheat-sheet.md) | All 54 problems: core insight, must-mention components, trap |
 
+## Software Design Principles (based on *Code Simplicity*)
+
+Lessons summarizing and applying the ideas of *Code Simplicity: The Fundamentals of Software* by Max Kanat-Alexander (O'Reilly, 2012, ISBN 978-1-4493-1389-0), written in our own words with brief attributed quotes.
+
+| # | Lesson | Simulation |
+|---|--------|------------|
+| 1 | [Purpose & the Equation of Design](software-design/01-purpose-and-the-equation-of-design.md) | Quick hack vs designed change over time |
+| 2 | [Change & the Three Flaws](software-design/02-change-and-the-three-flaws.md) | Incremental development steps |
+| 3 | [Defects, Small Changes & DRY](software-design/03-defects-small-changes-and-dry.md) | — |
+| 4 | [Simplicity, Readability & Consistency](software-design/04-simplicity-readability-and-consistency.md) | — |
+| 5 | [Complexity & How to Tame It](software-design/05-complexity-and-how-to-tame-it.md) | Complexity growth: n² vs modular |
+| 6 | [Testing & the Six Laws](software-design/06-testing-and-the-six-laws.md) | What 'tested' means |
+| 7 | [Applying Simplicity to System Design](software-design/07-applying-simplicity-to-system-design.md) | — |
+
 ## Fundamentals: Distributed Systems
 
 | # | Lesson | Simulation |
