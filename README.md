@@ -35,6 +35,12 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 10 | [Search Autocomplete / Typeahead](classic-system-design/10-search-autocomplete.md) | Tries, top-k, offline aggregation, caching |
 | 11 | [Cloud File Storage (Dropbox / Google Drive)](classic-system-design/11-file-storage.md) | Chunking, dedup, sync, conflict resolution |
 | 12 | [Payment System](classic-system-design/12-payment-system.md) | Idempotency, double-entry ledger, reconciliation, sagas |
+| 13 | [Distributed Message Queue (Kafka)](classic-system-design/13-distributed-message-queue.md) | Partitioned logs, ISR replication, consumer groups, exactly-once |
+| 14 | [Ticket Booking (Ticketmaster)](classic-system-design/14-ticket-booking.md) | Seat holds, row locking, virtual waiting room, bot defense |
+| 15 | [Collaborative Editor (Google Docs)](classic-system-design/15-collaborative-editor.md) | OT vs CRDTs, op logs, snapshots, presence |
+| 16 | [Distributed Job Scheduler](classic-system-design/16-distributed-job-scheduler.md) | Shard leases, timer wheels, misfires, at-least-once execution |
+| 17 | [Leaderboard & Top-K Heavy Hitters](classic-system-design/17-leaderboard-top-k.md) | Redis sorted sets, Count-Min Sketch, streaming windows |
+| 18 | [Metrics Monitoring & Alerting](classic-system-design/18-metrics-monitoring.md) | Time-series DB, Gorilla compression, rollups, cardinality, alerting |
 
 ## AI System Design
 
@@ -50,6 +56,12 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 8 | [Real-time Fraud Detection](ai-system-design/08-fraud-detection.md) | Streaming features, low-latency scoring, label delay, imbalance |
 | 9 | [ML Training & Feature Platform (MLOps)](ai-system-design/09-ml-platform.md) | Feature store, training-serving skew, model registry, CI/CD for ML |
 | 10 | [LLM Evaluation & Guardrails System](ai-system-design/10-llm-evaluation-guardrails.md) | Offline evals, LLM-as-judge, online monitoring, prompt injection defense |
+| 11 | [AI Code Assistant (Copilot / Cursor)](ai-system-design/11-ai-code-assistant.md) | FIM completion, latency tricks, code RAG, multi-file edits |
+| 12 | [Text-to-SQL Analytics Assistant](ai-system-design/12-text-to-sql-analytics.md) | Semantic layer, schema linking, validation loop, execution accuracy |
+| 13 | [Ad Click Prediction & Ranking](ai-system-design/13-ad-click-prediction.md) | CTR models, calibration, auctions, pacing, delayed feedback |
+| 14 | [Text-to-Image Generation Service](ai-system-design/14-image-generation-service.md) | Diffusion serving, step distillation, GPU scheduling, image safety |
+| 15 | [Real-time Voice AI Assistant](ai-system-design/15-voice-assistant.md) | Streaming ASR→LLM→TTS, latency budget, barge-in, turn-taking |
+| 16 | [Document Intelligence & Extraction](ai-system-design/16-document-extraction.md) | OCR + layout, VLM extraction, grounding, calibrated human review |
 
 ## How to use this repo
 
