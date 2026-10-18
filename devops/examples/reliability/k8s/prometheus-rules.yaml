@@ -1,0 +1,35 @@
+# Alerts that page a human. Requires the Prometheus Operator (kube-prometheus-stack).
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: notes-api-slo
+  namespace: monitoring
+  labels:
+    release: kube-prometheus-stack
+spec:
+  groups:
+    - name: notes-api.slo
+      rules:
+        # 99.9% availability SLO: page when the error budget burns 14.4x too fast (fast burn)
+        - alert: NotesApiHighErrorBudgetBurn
+          expr: |
+            (
+              sum(rate(http_requests_total{job="notes-api",code=~"5.."}[5m]))
+              / sum(rate(http_requests_total{job="notes-api"}[5m]))
+            ) > (14.4 * 0.001)
+          for: 2m
+          labels:
+            severity: page
+          annotations:
+            summary: "notes-api is burning its error budget fast"
+            runbook_url: "https://github.com/Nuvyaro/system-design-solutions/blob/HEAD/devops/20-incident-response-and-postmortems.md"
+    - name: notes-api.backups
+      rules:
+        # A backup that silently stops is a disaster waiting to happen
+        - alert: PostgresBackupMissing
+          expr: time() - kube_cronjob_status_last_successful_time{cronjob="postgres-backup"} > 26 * 3600
+          for: 10m
+          labels:
+            severity: page
+          annotations:
+            summary: "No successful PostgreSQL backup in the last 26 hours"

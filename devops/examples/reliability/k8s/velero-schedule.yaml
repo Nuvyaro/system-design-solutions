@@ -1,0 +1,26 @@
+# Velero backs up Kubernetes objects (and volume snapshots) so a whole cluster can be rebuilt.
+apiVersion: velero.io/v1
+kind: BackupStorageLocation
+metadata:
+  name: dr-region
+  namespace: velero
+spec:
+  provider: aws
+  objectStorage:
+    bucket: notes-velero-us-west-2     # bucket in the DR region
+  config:
+    region: us-west-2
+---
+apiVersion: velero.io/v1
+kind: Schedule
+metadata:
+  name: notes-prod-every-6h
+  namespace: velero
+spec:
+  schedule: "0 */6 * * *"
+  template:
+    includedNamespaces:
+      - notes-prod
+    snapshotVolumes: true
+    storageLocation: dr-region
+    ttl: 720h0m0s                      # keep 30 days

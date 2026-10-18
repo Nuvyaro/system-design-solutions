@@ -1651,6 +1651,79 @@ service:
     ui.caption("Type a word and Add it, then Check other words. Each word sets 3 bits chosen by 3 hash functions.");
   };
 
+  // ---------- 27. Disaster recovery strategies ----------
+  SIMS["dr-strategies"] = el => {
+    // durations in minutes; cost is a relative monthly index (primary region alone = 100)
+    const S = {
+      backup: { name: "Backup & restore", cost: 105, rpoBase: null, steps: [["Detect outage & declare disaster", 15], ["Provision infrastructure in DR region (IaC)", 60], ["Restore databases from latest backup", 120], ["Deploy apps & run smoke tests", 30], ["Switch DNS to DR region", 10]] },
+      pilot: { name: "Pilot light", cost: 120, rpoBase: 1, steps: [["Detect outage & declare disaster", 10], ["Promote replica database in DR region", 5], ["Scale up app servers from zero", 20], ["Smoke tests", 10], ["Switch DNS to DR region", 5]] },
+      warm: { name: "Warm standby", cost: 160, rpoBase: 0.5, steps: [["Detect outage (automated alarms)", 5], ["Promote replica database", 3], ["Scale standby from 20% to 100%", 7], ["Shift traffic (DNS / global LB)", 3]] },
+      active: { name: "Multi-site active-active", cost: 210, rpoBase: 0, steps: [["Health checks fail for the region", 1], ["Global load balancer drains the region", 1]] }
+    };
+    const ui = shell(el, "Disaster recovery: what happens when a region is lost",
+      `<div style="padding:14px">
+        <div style="display:flex;gap:10px;align-items:stretch;flex-wrap:wrap">
+          <div id="primary" style="flex:1;min-width:200px;padding:12px;border-radius:12px;border:2px solid ${C.kelp};background:var(--surface)"></div>
+          <div id="dr" style="flex:1;min-width:200px;padding:12px;border-radius:12px;border:2px solid var(--border);background:var(--surface)"></div>
+        </div>
+        <div id="steps" style="margin-top:12px;display:grid;gap:6px"></div>
+      </div>`,
+      `<label>DR strategy <select data-a="s"><option value="backup">Backup & restore</option><option value="pilot">Pilot light</option><option value="warm" selected>Warm standby</option><option value="active">Multi-site active-active</option></select></label>
+       <label>Backup every <select data-a="bk"><option value="60">1 hour</option><option value="240">4 hours</option><option value="1440" selected>24 hours</option></select></label>
+       <button class="primary" data-a="go">🌋 Earthquake: primary region destroyed</button><button data-a="reset">Reset</button>`,
+      stat("rto", "Downtime (RTO)", "–") + stat("rpo", "Data lost (RPO)", "–") + stat("cost", "Monthly cost index", "–"));
+    let key = "warm", running = false, timers = [];
+    const later = (ms, fn) => timers.push(setTimeout(() => { if (el.isConnected) fn(); }, ms));
+    const rpoText = () => {
+      const s = S[key];
+      if (s.rpoBase === null) { const bk = +ui.$('[data-a="bk"]').value; return bk >= 60 ? `up to ${bk / 60} h` : `${bk} min`; }
+      return s.rpoBase === 0 ? "≈ 0 (sync or multi-write)" : `≈ ${s.rpoBase < 1 ? Math.round(s.rpoBase * 60) + " s" : s.rpoBase + " min"} (async replication lag)`;
+    };
+    const regions = (down, recovered) => {
+      const s = S[key];
+      const drState = { backup: "Only backups stored here (no servers running)", pilot: "Database replica running · app servers off", warm: "Full stack running at ~20% capacity", active: "Serving ~50% of live traffic" }[key];
+      ui.$("#primary").style.borderColor = down ? C.coral : C.kelp;
+      ui.$("#primary").innerHTML = `<b>Primary region (us-east)</b><div style="font-size:13px;color:${down ? C.coral : "var(--muted)"};margin-top:4px">${down ? "🌋 Destroyed — no servers, no disks" : key === "active" ? "Serving ~50% of live traffic" : "Serving 100% of traffic"}</div>`;
+      ui.$("#dr").style.borderColor = recovered ? C.kelp : "var(--border)";
+      ui.$("#dr").innerHTML = `<b>DR region (us-west)</b><div style="font-size:13px;color:${recovered ? C.kelp : "var(--muted)"};margin-top:4px">${recovered ? "✓ Serving 100% of traffic" : drState}</div>`;
+      ui.stat("cost", `${s.cost}${s.cost > 100 ? ` (+${s.cost - 100}%)` : ""}`);
+    };
+    const renderSteps = (done, cur) => {
+      const s = S[key];
+      ui.$("#steps").innerHTML = s.steps.map(([t, m], i) => {
+        const col = i < done ? C.kelp : i === cur ? C.sand : "var(--border)";
+        return `<div style="display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:10px;border:2px solid ${col};background:var(--surface);font-size:13px">
+          <span style="font-family:var(--mono);color:var(--muted);width:18px">${i + 1}</span><span style="flex:1">${t}</span>
+          <b style="color:${i < done ? C.kelp : "var(--muted)"}">${m >= 60 ? (m / 60).toFixed(1) + " h" : m + " min"}${i < done ? " ✓" : i === cur ? " …" : ""}</b></div>`;
+      }).join("");
+    };
+    const reset = () => { timers.forEach(clearTimeout); timers = []; running = false; regions(false, false); renderSteps(-1, -1); ui.stat("rto", "–"); ui.stat("rpo", "–");
+      ui.caption({ backup: "Cheapest: nothing runs in the DR region except stored backups. Recovery means rebuilding everything.", pilot: "The core (database replica) is always on; everything else is switched on during a disaster.", warm: "A scaled-down copy of production is always running and just needs to scale up.", active: "Both regions serve traffic all the time; losing one just shifts load." }[key]); };
+    el.addEventListener("click", e => {
+      const a = e.target.dataset.a;
+      if (a === "reset") reset();
+      if (a !== "go" || running) return;
+      reset(); running = true; regions(true, false);
+      const s = S[key];
+      let i = 0, total = 0;
+      ui.caption(`Disaster declared. Following the <b>${s.name}</b> runbook…`);
+      const next = () => {
+        if (i >= s.steps.length) {
+          regions(true, true); running = false;
+          ui.stat("rto", total >= 60 ? `${(total / 60).toFixed(1)} h` : `${total} min`); ui.stat("rpo", rpoText());
+          ui.caption(`Recovered in <b>${total >= 60 ? (total / 60).toFixed(1) + " hours" : total + " minutes"}</b>, losing <b>${rpoText()}</b> of data, for a monthly cost index of ${s.cost}. Faster recovery costs more money every month — pick per system based on business impact.`);
+          return;
+        }
+        renderSteps(i, i);
+        later(Math.max(500, Math.min(1800, s.steps[i][1] * 12)), () => { total += s.steps[i][1]; i++; renderSteps(i, -1); next(); });
+      };
+      next();
+    });
+    ui.$('[data-a="s"]').addEventListener("change", ev => { key = ev.target.value; reset(); });
+    ui.$('[data-a="bk"]').addEventListener("change", () => { if (!running) ui.stat("rpo", "–"); });
+    reset();
+  };
+
   window.SIMS = {
     mount(el) {
       const fn = SIMS[el.dataset.sim];

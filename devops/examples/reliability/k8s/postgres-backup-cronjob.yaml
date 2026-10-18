@@ -1,0 +1,66 @@
+# Nightly logical backup of PostgreSQL to object storage in ANOTHER region.
+# Secrets "pg-backup" (PGPASSWORD) and "backup-s3" (AWS credentials) are created separately (never commit them).
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: postgres-backup
+  namespace: notes-prod
+spec:
+  schedule: "15 2 * * *"            # 02:15 UTC daily
+  timeZone: "Etc/UTC"
+  concurrencyPolicy: Forbid          # never run two backups at once
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 5
+  jobTemplate:
+    spec:
+      backoffLimit: 2
+      activeDeadlineSeconds: 3600
+      template:
+        spec:
+          restartPolicy: OnFailure
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 10001
+          containers:
+            - name: backup
+              image: postgres:16-alpine
+              command: ["/bin/sh", "-c"]
+              args:
+                - |
+                  set -euo pipefail
+                  STAMP=$(date -u +%Y-%m-%dT%H%M%SZ)
+                  pg_dump --format=custom --no-owner -h "$PGHOST" -U "$PGUSER" "$PGDATABASE" > /tmp/backup.dump
+                  pg_restore --list /tmp/backup.dump > /dev/null   # sanity check: the archive is readable
+                  sha256sum /tmp/backup.dump | tee /tmp/backup.dump.sha256
+                  echo "backup ${STAMP} ready, uploading"
+                  # Upload step shown with the AWS CLI; in practice use an image that bundles it:
+                  # aws s3 cp /tmp/backup.dump "s3://${BUCKET}/postgres/${STAMP}.dump" --region "$BACKUP_REGION"
+              env:
+                - name: PGHOST
+                  value: postgres.notes-prod.svc.cluster.local
+                - name: PGUSER
+                  value: backup
+                - name: PGDATABASE
+                  value: notes
+                - name: PGPASSWORD
+                  valueFrom:
+                    secretKeyRef:
+                      name: pg-backup
+                      key: PGPASSWORD
+                - name: BUCKET
+                  value: notes-backups-us-west-2
+                - name: BACKUP_REGION
+                  value: us-west-2
+              resources:
+                requests:
+                  cpu: 100m
+                  memory: 256Mi
+                limits:
+                  memory: 1Gi
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
+          volumes:
+            - name: tmp
+              emptyDir:
+                sizeLimit: 20Gi

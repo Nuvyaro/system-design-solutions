@@ -63,7 +63,7 @@ window.CATALOG = [
   },
   {
     id: "devops",
-    title: "DevOps: Docker, Kubernetes & CI/CD",
+    title: "DevOps: Docker, Kubernetes, CI/CD & Disaster Recovery",
     blurb: "From your first container to production Kubernetes with automated pipelines. Every YAML file is real and tested.",
     kind: "lesson",
     items: [
@@ -80,7 +80,15 @@ window.CATALOG = [
       { path: "devops/11-ci-cd-with-github-actions", title: "CI/CD 1: GitHub Actions", desc: "Test → build → scan → push → deploy, with approvals.", mins: 16, sim: true },
       { path: "devops/12-gitops-and-deployment-strategies", title: "CI/CD 2: GitOps & Deploy Strategies", desc: "Argo CD, blue/green, canary, safe migrations.", mins: 12, sim: true },
       { path: "devops/13-capstone-end-to-end", title: "Capstone: Code to Production", desc: "Hands-on project tying everything together.", mins: 90, sim: true },
-      { path: "devops/14-troubleshooting-cheatsheet", title: "Troubleshooting & Cheat Sheet", desc: "Pod statuses, kubectl/docker commands, CI fixes.", mins: 8, sim: true }
+      { path: "devops/14-troubleshooting-cheatsheet", title: "Troubleshooting & Cheat Sheet", desc: "Pod statuses, kubectl/docker commands, CI fixes.", mins: 8, sim: true },
+      { path: "devops/15-disaster-recovery-and-business-continuity", title: "Reliability 1: Disaster Recovery", desc: "RTO/RPO, natural disasters, the 4 DR strategies.", mins: 14, sim: true },
+      { path: "devops/16-backup-and-restore", title: "Reliability 2: Backup & Restore", desc: "PITR, Velero, ransomware-proof immutable backups.", mins: 12, sim: true },
+      { path: "devops/17-multi-region-high-availability", title: "Reliability 3: Multi-Region HA", desc: "Zones, regions, failover, active-active, cells.", mins: 14, sim: true },
+      { path: "devops/18-infrastructure-as-code-terraform", title: "Reliability 4: Terraform IaC", desc: "Plan/apply, state, modules, multi-region, CI.", mins: 14, sim: true },
+      { path: "devops/19-observability-and-alerting", title: "Reliability 5: Observability & SLOs", desc: "Metrics, logs, traces, burn-rate alerts.", mins: 12, sim: true },
+      { path: "devops/20-incident-response-and-postmortems", title: "Reliability 6: Incident Response", desc: "Severity, roles, runbooks, blameless postmortems.", mins: 10, sim: true },
+      { path: "devops/21-chaos-engineering-and-dr-drills", title: "Reliability 7: Chaos & DR Drills", desc: "Fault injection, game days, region evacuation.", mins: 12, sim: true },
+      { path: "devops/22-devsecops-and-supply-chain-security", title: "Reliability 8: DevSecOps", desc: "Secrets, SBOMs, signing, admission policies.", mins: 12, sim: true }
     ]
   },
   {

@@ -1,0 +1,30 @@
+# Chaos Mesh experiments for game days. Run in staging first, with a clear abort plan.
+apiVersion: chaos-mesh.org/v1alpha1
+kind: PodChaos
+metadata:
+  name: kill-one-api-pod
+  namespace: notes-staging
+spec:
+  action: pod-kill
+  mode: one                       # one random matching pod
+  selector:
+    namespaces: [notes-staging]
+    labelSelectors:
+      app: notes-api
+---
+apiVersion: chaos-mesh.org/v1alpha1
+kind: NetworkChaos
+metadata:
+  name: slow-redis
+  namespace: notes-staging
+spec:
+  action: delay
+  mode: all
+  selector:
+    namespaces: [notes-staging]
+    labelSelectors:
+      app: redis
+  delay:
+    latency: "300ms"
+    jitter: "50ms"
+  duration: "5m"                  # experiments must end on their own

@@ -116,3 +116,5 @@ quoted: "1.20"             # keep as string
 - **Certifications:** CKAD (developer), CKA (administrator), CKS (security).
 - **Practice:** Killercoda / Play with Kubernetes scenarios; break things in a kind cluster on purpose.
 - **Go deeper:** service meshes, Operators and CRDs, cluster autoscaling with Karpenter, policy-as-code (Kyverno), supply-chain security (cosign, SBOMs, SLSA).
+
+**Next:** [Reliability 1: Disaster recovery & business continuity](15-disaster-recovery-and-business-continuity.md)

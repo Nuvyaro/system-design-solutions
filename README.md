@@ -5,7 +5,7 @@ Animated, beginner-friendly tutorials plus full interview solutions, in four tra
 1. **Fundamentals**: short lessons on the building blocks (caching, sharding, queues, embeddings, LLM inference, RAG…), each with an interactive simulation.
 2. **Classic system design**: distributed systems problems asked at most backend / infrastructure interviews.
 3. **AI system design**: ML and LLM-powered systems, increasingly asked for ML engineer, AI engineer, and applied-scientist roles.
-4. **DevOps**: Docker, Kubernetes, YAML and CI/CD from basics to production, with real, tested example files.
+4. **DevOps**: Docker, Kubernetes, YAML, CI/CD, disaster recovery and reliability engineering from basics to production, with real, tested example files.
 
 ## 🌊 The website
 
@@ -139,7 +139,7 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 25 | [LLM Pretraining Data Pipeline](ai-system-design/25-llm-pretraining-data-pipeline.md) | Extraction, MinHash dedup, quality classifiers, PII, decontamination, mixtures |
 | 26 | [AI Meeting Assistant](ai-system-design/26-ai-meeting-assistant.md) | Streaming ASR + diarization, hierarchical summarization, permissioned search |
 
-## DevOps: Docker, Kubernetes & CI/CD
+## DevOps: Docker, Kubernetes, CI/CD & Disaster Recovery
 
 | # | Tutorial | Level |
 |---|----------|-------|
@@ -157,6 +157,16 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 12 | [GitOps & Deployment Strategies](devops/12-gitops-and-deployment-strategies.md) | Advanced |
 | 13 | [Capstone: Code to Production](devops/13-capstone-end-to-end.md) | Hands-on |
 | 14 | [Troubleshooting & Cheat Sheet](devops/14-troubleshooting-cheatsheet.md) | Reference |
+| 15 | [Disaster Recovery & Business Continuity](devops/15-disaster-recovery-and-business-continuity.md) | Advanced |
+| 16 | [Backup & Restore (DB, Kubernetes, ransomware)](devops/16-backup-and-restore.md) | Intermediate |
+| 17 | [High Availability: Zones, Regions & Failover](devops/17-multi-region-high-availability.md) | Advanced |
+| 18 | [Infrastructure as Code with Terraform](devops/18-infrastructure-as-code-terraform.md) | Intermediate → Advanced |
+| 19 | [Observability, SLOs & Alerting](devops/19-observability-and-alerting.md) | Intermediate → Advanced |
+| 20 | [Incident Response, On-Call & Postmortems](devops/20-incident-response-and-postmortems.md) | Intermediate |
+| 21 | [Chaos Engineering, Game Days & DR Drills](devops/21-chaos-engineering-and-dr-drills.md) | Advanced |
+| 22 | [DevSecOps & Supply-Chain Security](devops/22-devsecops-and-supply-chain-security.md) | Intermediate → Advanced |
+
+The reliability examples in [`devops/examples/reliability`](devops/examples/reliability) include Terraform for immutable cross-region backups and DNS failover (passes `terraform validate` with the AWS provider), plus a PostgreSQL backup CronJob, Velero schedules, Prometheus SLO alerts and Chaos Mesh experiments (all schema-validated).
 
 The [`devops/examples`](devops/examples) folder holds a working app with its Dockerfile, Compose file, Kubernetes manifests (Kustomize base + staging/production overlays), a Helm chart, and a GitHub Actions pipeline. They are verified: unit tests pass, the image builds and runs, the manifests and rendered chart pass `kubeconform` against Kubernetes 1.30, and the workflow passes `actionlint`.
 
