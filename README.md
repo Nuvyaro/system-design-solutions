@@ -82,6 +82,16 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | 16 | [Distributed Job Scheduler](classic-system-design/16-distributed-job-scheduler.md) | Shard leases, timer wheels, misfires, at-least-once execution |
 | 17 | [Leaderboard & Top-K Heavy Hitters](classic-system-design/17-leaderboard-top-k.md) | Redis sorted sets, Count-Min Sketch, streaming windows |
 | 18 | [Metrics Monitoring & Alerting](classic-system-design/18-metrics-monitoring.md) | Time-series DB, Gorilla compression, rollups, cardinality, alerting |
+| 19 | [Proximity Service (Yelp / Nearby)](classic-system-design/19-proximity-service.md) | Geohash, quadtree, S2/H3, replicated geo index |
+| 20 | [Hotel Reservation (Booking.com / Airbnb)](classic-system-design/20-hotel-reservation.md) | Inventory per night, transactions, idempotency, overbooking |
+| 21 | [Stock Exchange (Order Matching)](classic-system-design/21-stock-exchange.md) | Order book, sequencer, event sourcing, low latency |
+| 22 | [Unique ID Generator (Snowflake)](classic-system-design/22-unique-id-generator.md) | 64-bit IDs, clock skew, machine-ID leasing |
+| 23 | [Object Storage (Amazon S3)](classic-system-design/23-object-storage.md) | Metadata/data split, erasure coding, multipart upload |
+| 24 | [Email Service (Gmail)](classic-system-design/24-email-service.md) | SMTP/MX, per-user partitioning, spam filtering, search |
+| 25 | [Ad Click Event Aggregation](classic-system-design/25-ad-click-aggregation.md) | Event-time windows, watermarks, exactly-once, reconciliation |
+| 26 | [Online Code Judge (LeetCode)](classic-system-design/26-online-code-judge.md) | Sandboxing, resource limits, queues, contest leaderboards |
+| 27 | [Live Streaming + Chat (Twitch)](classic-system-design/27-live-streaming.md) | RTMP ingest, LL-HLS, CDN fan-out, chat at scale |
+| 28 | [Web Search Engine (Google)](classic-system-design/28-web-search-engine.md) | Inverted index, document sharding, BM25, PageRank, re-ranking |
 
 ## AI System Design
 

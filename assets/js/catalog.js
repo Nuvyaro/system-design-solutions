@@ -88,7 +88,17 @@ window.CATALOG = [
       { path: "classic-system-design/15-collaborative-editor", title: "Collaborative Editor", desc: "OT vs CRDTs, op logs, presence.", mins: 25 },
       { path: "classic-system-design/16-distributed-job-scheduler", title: "Distributed Job Scheduler", desc: "Shard leases, timer wheels, misfires.", mins: 20 },
       { path: "classic-system-design/17-leaderboard-top-k", title: "Leaderboard & Top-K", desc: "Sorted sets, Count-Min Sketch, windows.", mins: 20 },
-      { path: "classic-system-design/18-metrics-monitoring", title: "Metrics Monitoring", desc: "Time-series storage, rollups, alerting.", mins: 25 }
+      { path: "classic-system-design/18-metrics-monitoring", title: "Metrics Monitoring", desc: "Time-series storage, rollups, alerting.", mins: 25 },
+      { path: "classic-system-design/19-proximity-service", title: "Proximity Service (Yelp)", desc: "Geohash, quadtrees, nearby search.", mins: 20 },
+      { path: "classic-system-design/20-hotel-reservation", title: "Hotel Reservation", desc: "Inventory per night, no overbooking.", mins: 20 },
+      { path: "classic-system-design/21-stock-exchange", title: "Stock Exchange", desc: "Order books, matching engine, determinism.", mins: 25 },
+      { path: "classic-system-design/22-unique-id-generator", title: "Unique ID Generator", desc: "Snowflake IDs, clocks, machine IDs.", mins: 15 },
+      { path: "classic-system-design/23-object-storage", title: "Object Storage (S3)", desc: "Metadata vs data, erasure coding.", mins: 25 },
+      { path: "classic-system-design/24-email-service", title: "Email Service (Gmail)", desc: "SMTP, mailboxes, spam, search.", mins: 20 },
+      { path: "classic-system-design/25-ad-click-aggregation", title: "Ad Click Aggregation", desc: "Exactly-once streaming counts.", mins: 20 },
+      { path: "classic-system-design/26-online-code-judge", title: "Online Code Judge (LeetCode)", desc: "Sandboxing untrusted code, contests.", mins: 20 },
+      { path: "classic-system-design/27-live-streaming", title: "Live Streaming (Twitch)", desc: "Low-latency video and live chat.", mins: 20 },
+      { path: "classic-system-design/28-web-search-engine", title: "Web Search Engine", desc: "Inverted index, sharding, ranking.", mins: 25 }
     ]
   },
   {
