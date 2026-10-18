@@ -1808,6 +1808,191 @@ service:
     draw();
   };
 
+  // ---------- 30. LSM-tree storage engine ----------
+  SIMS["lsm-tree"] = el => {
+    const MEM = 4, L0MAX = 3;
+    const ui = shell(el, "LSM-tree: memtable → SSTables → compaction",
+      `<div style="padding:14px;display:grid;gap:10px">
+        <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px">MEMTABLE (in memory, sorted · flushes at ${MEM} keys) + WRITE-AHEAD LOG on disk</div><div id="mem" style="display:flex;gap:6px;flex-wrap:wrap;min-height:34px"></div></div>
+        <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px">LEVEL 0 SSTables (immutable, newest first · compacts at ${L0MAX})</div><div id="l0" style="display:grid;gap:6px"></div></div>
+        <div><div style="font-size:12px;color:var(--muted);margin-bottom:4px">LEVEL 1 (merged, one sorted run)</div><div id="l1"></div></div>
+      </div>`,
+      `<button class="primary" data-a="write">✍️ Write a key</button><button data-a="del">🗑 Delete a key</button>
+       <label>Read <select data-a="key"></select></label><button data-a="read">🔍 Read</button><button data-a="compact">Compact now</button>`,
+      stat("writes", "Writes", "0") + stat("files", "Files checked on last read", "–") + stat("disk", "Entries on disk", "0"));
+    const keys = ["apple", "berry", "cherry", "date", "fig", "grape", "kiwi", "lemon", "mango", "olive"];
+    let mem = new Map(), l0 = [], l1 = [], writes = 0, ver = 0, hl = null;
+    ui.$('[data-a="key"]').innerHTML = keys.map(k => `<option>${k}</option>`).join("");
+    const chip = (k, v, color, mark) => `<span style="font:12px var(--mono);padding:4px 7px;border-radius:6px;border:2px solid ${mark ? C.sand : color};background:color-mix(in srgb, ${color} 14%, var(--surface))">${k}=${v === null ? "🪦" : "v" + v}</span>`;
+    const run = (entries, color, label) => `<div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding:6px;border-radius:8px;border:1px dashed var(--border)"><b style="font-size:11px;color:var(--muted);width:62px">${label}</b>${entries.map(([k, v]) => chip(k, v, color, hl && hl.k === k && hl.where === label)).join("") || '<span style="font-size:12px;color:var(--muted)">empty</span>'}</div>`;
+    const render = () => {
+      ui.$("#mem").innerHTML = [...mem.entries()].sort().map(([k, v]) => chip(k, v, C.sea, hl && hl.k === k && hl.where === "mem")).join("") || '<span style="font-size:12px;color:var(--muted)">empty</span>';
+      ui.$("#l0").innerHTML = l0.map((t, i) => run(t, C.teal, `SST-${l0.length - i}`)).join("") || '<span style="font-size:12px;color:var(--muted)">none</span>';
+      ui.$("#l1").innerHTML = run(l1, C.violet, "L1");
+      ui.stat("writes", writes); ui.stat("disk", l0.reduce((a, t) => a + t.length, 0) + l1.length);
+    };
+    const flush = () => {
+      if (!mem.size) return;
+      l0.unshift([...mem.entries()].sort()); mem = new Map();
+      ui.caption("Memtable full → written to disk as a new sorted, immutable SSTable (fast sequential write).");
+      if (l0.length >= L0MAX) compact();
+    };
+    const compact = () => {
+      const merged = new Map(l1);
+      [...l0].reverse().forEach(t => t.forEach(([k, v]) => merged.set(k, v)));   // newer tables overwrite older
+      const before = l0.reduce((a, t) => a + t.length, 0) + l1.length;
+      l1 = [...merged.entries()].filter(([, v]) => v !== null).sort(); l0 = [];
+      ui.caption(`Compaction merged ${before} entries into ${l1.length}: kept only the newest version of each key and dropped tombstones.`);
+    };
+    const put = (k, v) => { mem.set(k, v); writes++; hl = { k, where: "mem" }; if (mem.size >= MEM) flush(); render(); };
+    el.addEventListener("click", e => {
+      const a = e.target.dataset.a;
+      if (a === "write") { const k = keys[Math.floor(Math.random() * keys.length)]; put(k, ++ver); if (mem.size) ui.caption(`Wrote ${k}: appended to the write-ahead log and inserted into the in-memory memtable. No random disk writes!`); }
+      else if (a === "del") { const k = keys[Math.floor(Math.random() * keys.length)]; put(k, null); ui.caption(`Deleted ${k}: writes a tombstone 🪦 — the old value is only removed during compaction.`); }
+      else if (a === "compact") { flush(); if (l0.length) compact(); render(); }
+      else if (a === "read") {
+        const k = ui.$('[data-a="key"]').value; let files = 0, found;
+        if (mem.has(k)) { found = { v: mem.get(k), where: "mem" }; }
+        else {
+          for (let i = 0; i < l0.length && !found; i++) { files++; const hit = l0[i].find(([x]) => x === k); if (hit) found = { v: hit[1], where: `SST-${l0.length - i}` }; }
+          if (!found) { files++; const hit = l1.find(([x]) => x === k); if (hit) found = { v: hit[1], where: "L1" }; }
+        }
+        hl = found ? { k, where: found.where } : null; ui.stat("files", files); render();
+        ui.caption(!found ? `${k} not found after checking ${files} file(s). Real engines use a Bloom filter per SSTable to skip files that can't contain the key.`
+          : found.v === null ? `${k} hit a tombstone in ${found.where} → it's deleted (stop searching older files).`
+            : `${k}=v${found.v} found in ${found.where === "mem" ? "the memtable (no disk read)" : found.where} after checking ${files} file(s). Newest data is searched first.`);
+      }
+    });
+    render();
+    ui.caption("Write keys until the memtable flushes, keep going until compaction runs, then read keys and count how many files a lookup touches.");
+  };
+
+  // ---------- 31. Transaction isolation anomalies ----------
+  SIMS["isolation"] = el => {
+    const scen = {
+      dirty: { name: "Dirty read", steps: [["T1", "BEGIN; UPDATE accounts SET balance = 0 WHERE id = 1 (was 100)"], ["T2", "BEGIN; SELECT balance FROM accounts WHERE id = 1"], ["T1", "ROLLBACK"], ["T2", "uses the balance it read; COMMIT"]],
+        result: { ru: [false, "T2 read 0 — a value that never committed (T1 rolled back)."], rc: [true, "T2 read 100: it never sees uncommitted data."], si: [true, "T2 read 100 from its snapshot."], ser: [true, "T2 read 100."] } },
+      lost: { name: "Lost update", steps: [["T1", "BEGIN; SELECT likes FROM posts WHERE id = 7 → 10"], ["T2", "BEGIN; SELECT likes FROM posts WHERE id = 7 → 10"], ["T1", "UPDATE posts SET likes = 11 (10 + 1); COMMIT"], ["T2", "UPDATE posts SET likes = 11 (10 + 1); COMMIT"]],
+        result: { ru: [false, "Final likes = 11, but two likes happened. T1's update was lost."], rc: [false, "Final likes = 11. Read committed doesn't stop read-modify-write races."], si: [true, "PostgreSQL-style snapshot isolation detects the concurrent update and aborts T2, which retries → 12."], ser: [true, "One transaction aborts and retries → final likes = 12."] } },
+      skew: { name: "Write skew (on-call doctors)", steps: [["T1", "BEGIN; SELECT count(*) FROM doctors WHERE on_call → 2"], ["T2", "BEGIN; SELECT count(*) FROM doctors WHERE on_call → 2"], ["T1", "2 ≥ 2, so Alice goes off call: UPDATE doctors SET on_call=false WHERE name='Alice'; COMMIT"], ["T2", "2 ≥ 2, so Bob goes off call: UPDATE doctors SET on_call=false WHERE name='Bob'; COMMIT"]],
+        result: { ru: [false, "Nobody is on call! Each checked the rule, but on different rows."], rc: [false, "Nobody is on call — the rule 'at least one doctor' is broken."], si: [false, "Still broken: snapshot isolation doesn't catch conflicts on different rows."], ser: [true, "Serializable detects the dependency and aborts T2 → Bob stays on call."] } }
+    };
+    const levels = { ru: "Read uncommitted", rc: "Read committed", si: "Snapshot isolation / repeatable read", ser: "Serializable" };
+    const ui = shell(el, "Isolation levels: which anomalies can happen?",
+      `<div style="padding:14px"><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div><b style="color:${C.sea}">Transaction T1</b><div id="t1" style="display:grid;gap:6px;margin-top:6px"></div></div>
+        <div><b style="color:${C.violet}">Transaction T2</b><div id="t2" style="display:grid;gap:6px;margin-top:6px"></div></div>
+      </div><div id="res" style="margin-top:12px;padding:10px 12px;border-radius:10px;font-size:14px;display:none"></div></div>`,
+      `<label>Anomaly <select data-a="sc">${Object.entries(scen).map(([k, s]) => `<option value="${k}">${s.name}</option>`).join("")}</select></label>
+       <label>Isolation level <select data-a="lv">${Object.entries(levels).map(([k, n]) => `<option value="${k}" ${k === "rc" ? "selected" : ""}>${n}</option>`).join("")}</select></label>
+       <button class="primary" data-a="run">▶ Run interleaving</button>`);
+    let timers = [];
+    const reset = () => {
+      timers.forEach(clearTimeout); timers = [];
+      ui.$("#t1").innerHTML = ""; ui.$("#t2").innerHTML = ""; ui.$("#res").style.display = "none";
+    };
+    const run = () => {
+      reset();
+      const s = scen[ui.$('[data-a="sc"]').value], lv = ui.$('[data-a="lv"]').value;
+      s.steps.forEach(([t, txt], i) => timers.push(setTimeout(() => {
+        if (!el.isConnected) return;
+        const box = document.createElement("div");
+        box.style.cssText = `font:12.5px var(--mono);padding:7px 9px;border-radius:8px;border:2px solid ${t === "T1" ? C.sea : C.violet};background:var(--surface);animation:reveal .3s ease`;
+        box.innerHTML = `<span style="color:var(--muted)">t${i + 1}</span> ${txt}`;
+        ui.$(t === "T1" ? "#t1" : "#t2").appendChild(box);
+        (t === "T1" ? ui.$("#t2") : ui.$("#t1")).insertAdjacentHTML("beforeend", `<div style="height:${box.offsetHeight}px"></div>`);
+      }, 400 + i * 900)));
+      timers.push(setTimeout(() => {
+        if (!el.isConnected) return;
+        const [ok, msg] = s.result[lv]; const r = ui.$("#res");
+        r.style.display = "block"; r.style.border = `2px solid ${ok ? C.kelp : C.coral}`;
+        r.style.background = `color-mix(in srgb, ${ok ? C.kelp : C.coral} 12%, var(--surface))`;
+        r.innerHTML = `<b>${ok ? "✓ Prevented" : "✕ Anomaly"} under ${levels[lv]}:</b> ${msg}`;
+      }, 400 + s.steps.length * 900 + 300));
+    };
+    el.addEventListener("click", e => { if (e.target.dataset.a === "run") run(); });
+    el.addEventListener("change", reset);
+    ui.caption("Pick an anomaly and an isolation level, then run the interleaving. Try write skew under snapshot isolation vs serializable.");
+  };
+
+  // ---------- 32. Stream windows, watermarks & late events ----------
+  SIMS["stream-windows"] = el => {
+    const W = 10, SPAN = 60;
+    const ui = shell(el, "Event-time windows, watermarks and late events",
+      `<svg viewBox="0 0 600 230" role="img" aria-label="Events falling into 10-second event-time windows"><g id="g"></g></svg>`,
+      `<label>Max network delay <input type="range" min="0" max="15" step="1" value="6" data-a="delay"> <span data-v="delay">6</span> s</label>
+       <label>Allowed lateness <input type="range" min="0" max="12" step="1" value="3" data-a="late"> <span data-v="late">3</span> s</label>
+       <button data-a="restart">↺ Restart</button>`,
+      stat("emitted", "Windows emitted", "0") + stat("late", "Late events dropped", "0") + stat("acc", "Counts exactly right", "–"));
+    let clock, events, wins, rnd, acc, timerAcc;
+    const reset = () => {
+      clock = 0; events = []; wins = {}; acc = 0; timerAcc = 0; rnd = rng(5);
+      ui.stat("emitted", 0); ui.stat("late", 0); ui.stat("acc", "–");
+    };
+    const X = t => 30 + (t / SPAN) * 550;
+    const draw = () => {
+      const maxDelay = +ui.$('[data-a="delay"]').value, late = +ui.$('[data-a="late"]').value;
+      const maxSeen = events.reduce((m, e) => (e.arrived ? Math.max(m, e.t) : m), 0);
+      const watermark = Math.max(0, maxSeen - late);
+      let html = "";
+      for (let w = 0; w < SPAN; w += W) {
+        const st = wins[w] || { count: 0, truth: 0, emitted: null };
+        const closed = st.emitted !== null;
+        html += `<rect x="${X(w)}" y="30" width="${X(W) - X(0) - 3}" height="150" rx="6" style="fill:${closed ? (st.emitted === st.truth ? "color-mix(in srgb," + C.kelp + " 14%, var(--surface))" : "color-mix(in srgb," + C.coral + " 14%, var(--surface))") : "var(--surface)"};stroke:var(--border)"/>
+          <text x="${X(w + W / 2)}" y="198" text-anchor="middle" font-size="11" style="fill:var(--muted)">[${w}–${w + W})s</text>
+          <text x="${X(w + W / 2)}" y="48" text-anchor="middle" font-size="12" font-weight="700" style="fill:var(--text)">${closed ? `emitted ${st.emitted}${st.emitted !== st.truth ? ` (true ${st.truth})` : " ✓"}` : `open: ${st.count}`}</text>`;
+      }
+      events.forEach(e => {
+        if (!e.arrived) return;
+        const w = Math.floor(e.t / W) * W, idx = e.slot;
+        html += `<circle cx="${X(e.t)}" cy="${170 - (idx % 12) * 10}" r="4" fill="${e.lateDrop ? C.coral : C.sea}"/>`;
+      });
+      html += `<line x1="${X(watermark)}" x2="${X(watermark)}" y1="22" y2="185" style="stroke:${C.violet};stroke-width:2;stroke-dasharray:5 4"/>
+        <text x="${Math.min(X(watermark) + 4, 520)}" y="18" font-size="11" font-weight="700" fill="${C.violet}">watermark ${watermark.toFixed(0)}s</text>
+        <text x="30" y="222" font-size="11" style="fill:var(--muted)">Blue = event placed by its event time · Red = arrived after its window closed (dropped) · processing clock: ${clock.toFixed(0)}s · max delay ${maxDelay}s</text>`;
+      ui.$("#g").innerHTML = html;
+    };
+    el.addEventListener("input", e => {
+      const a = e.target.dataset.a; if (!a) return;
+      ui.$(`[data-v="${a}"]`).textContent = e.target.value;
+    });
+    el.addEventListener("click", e => { if (e.target.dataset.a === "restart") { reset(); draw(); } });
+    reset(); draw();
+    ui.caption("Each window counts events by when they <b>happened</b>. A window closes when the watermark passes its end. Raise the network delay above the allowed lateness to see late events dropped.");
+    loop(el, dt => {
+      if (clock > SPAN + 20) return;
+      clock += dt * 4;
+      timerAcc += dt * 4;
+      const maxDelay = +ui.$('[data-a="delay"]').value, late = +ui.$('[data-a="late"]').value;
+      while (timerAcc > 0.7 && clock < SPAN) {
+        timerAcc -= 0.7;
+        const t = clock, delay = rnd() * maxDelay, w = Math.floor(t / W) * W;
+        wins[w] = wins[w] || { count: 0, truth: 0, emitted: null };
+        wins[w].truth++;
+        events.push({ t, arriveAt: t + delay, arrived: false, slot: wins[w].truth });
+      }
+      events.forEach(e => {
+        if (e.arrived || clock < e.arriveAt) return;
+        e.arrived = true;
+        const w = Math.floor(e.t / W) * W;
+        if (wins[w].emitted !== null) { e.lateDrop = true; ui.stat("late", events.filter(x => x.lateDrop).length); }
+        else wins[w].count++;
+      });
+      const maxSeen = events.reduce((m, e) => (e.arrived ? Math.max(m, e.t) : m), 0);
+      const watermark = clock >= SPAN + 15 ? Infinity : maxSeen - late;
+      Object.keys(wins).forEach(k => {
+        const w = +k, st = wins[w];
+        if (st.emitted === null && watermark >= w + W) {
+          st.emitted = st.count;
+          const done = Object.values(wins).filter(x => x.emitted !== null);
+          ui.stat("emitted", done.length);
+          ui.stat("acc", `${done.filter(x => x.emitted === x.truth).length}/${done.length}`);
+        }
+      });
+      draw();
+    });
+  };
+
   window.SIMS = {
     mount(el) {
       const fn = SIMS[el.dataset.sim];

@@ -41,6 +41,7 @@ Start with the [interview framework](framework.md) — it explains how to run a 
 | [20 common mistakes](interview-prep/04-common-mistakes.md) | What candidates do wrong and exactly what to say instead |
 | [Scoring rubric](interview-prep/05-scoring-rubric.md) | How interviewers grade, junior → staff, with a score sheet |
 | [Night-before cheat sheet](interview-prep/06-cheat-sheet.md) | All 54 problems: core insight, must-mention components, trap |
+| [Book reading guide](interview-prep/07-book-reading-guide.md) | Maps every chapter of Alex Xu Vol. 1 & 2, *Designing Data-Intensive Applications* and *Code Simplicity* to lessons here |
 
 ## Software Design Principles (based on *Code Simplicity*)
 
@@ -74,6 +75,12 @@ Lessons summarizing and applying the ideas of *Code Simplicity: The Fundamentals
 | 12 | [Consensus & Raft](fundamentals/systems/12-consensus-and-raft.md) | 5-node Raft: kill the leader, watch the election |
 | 13 | [Distributed Transactions & Sagas](fundamentals/systems/13-distributed-transactions-and-sagas.md) | Saga compensations vs two-phase commit |
 | 14 | [Bloom Filters & Sketches](fundamentals/systems/14-bloom-filters.md) | Add/check words, see false positives |
+| 15 | [Data Models](fundamentals/systems/15-data-models-and-query-languages.md) | Choosing a model |
+| 16 | [Storage Engines: LSM vs B-Tree](fundamentals/systems/16-storage-engines-lsm-vs-btree.md) | Memtable flushes, SSTables, compaction, tombstones |
+| 17 | [Encoding & Schema Evolution](fundamentals/systems/17-encoding-and-schema-evolution.md) | Rolling deploy compatibility |
+| 18 | [Transactions & Isolation Levels](fundamentals/systems/18-transactions-and-isolation-levels.md) | Run anomalies under each isolation level |
+| 19 | [Time, Clocks & Ordering](fundamentals/systems/19-time-clocks-and-ordering.md) | Clock skew loses a write |
+| 20 | [Batch & Stream Processing](fundamentals/systems/20-batch-and-stream-processing.md) | Event-time windows, watermarks, late events |
 
 ## Fundamentals: AI & ML Systems
 
@@ -121,6 +128,9 @@ Lessons summarizing and applying the ideas of *Code Simplicity: The Fundamentals
 | 26 | [Online Code Judge (LeetCode)](classic-system-design/26-online-code-judge.md) | Sandboxing, resource limits, queues, contest leaderboards |
 | 27 | [Live Streaming + Chat (Twitch)](classic-system-design/27-live-streaming.md) | RTMP ingest, LL-HLS, CDN fan-out, chat at scale |
 | 28 | [Web Search Engine (Google)](classic-system-design/28-web-search-engine.md) | Inverted index, document sharding, BM25, PageRank, re-ranking |
+| 29 | [Nearby Friends](classic-system-design/29-nearby-friends.md) | Per-user pub/sub channels, location cache with TTL, WebSocket fleet |
+| 30 | [Google Maps](classic-system-design/30-google-maps.md) | Map tiles + CDN, hierarchical routing, live-traffic ETA, rerouting |
+| 31 | [Digital Wallet](classic-system-design/31-digital-wallet.md) | Event sourcing, single-writer state machines, cross-partition sagas |
 
 ## AI System Design
 

@@ -19,7 +19,8 @@ window.CATALOG = [
       { path: "interview-prep/03-mock-interview-chat-system", title: "Mock Interview: Chat (Hard Pushback)", desc: "Senior interview: defending, adapting, disagreeing politely.", mins: 15, sim: true },
       { path: "interview-prep/04-common-mistakes", title: "20 Common Mistakes", desc: "What candidates do wrong and what to say instead.", mins: 10, sim: true },
       { path: "interview-prep/05-scoring-rubric", title: "Scoring Rubric", desc: "How interviewers grade, junior to staff, with a score sheet.", mins: 8, sim: true },
-      { path: "interview-prep/06-cheat-sheet", title: "Night-Before Cheat Sheet", desc: "All 54 problems: core insight, must-mention, trap.", mins: 12 }
+      { path: "interview-prep/06-cheat-sheet", title: "Night-Before Cheat Sheet", desc: "All 54 problems: core insight, must-mention, trap.", mins: 12 },
+      { path: "interview-prep/07-book-reading-guide", title: "Book Reading Guide", desc: "Alex Xu Vol. 1 & 2, DDIA, Code Simplicity → lessons here.", mins: 6, sim: true }
     ]
   },
   {
@@ -56,7 +57,13 @@ window.CATALOG = [
       { path: "fundamentals/systems/11-networking-cdn-and-apis", title: "Networking, CDNs & APIs", desc: "Life of a request; REST, gRPC, WebSockets, SSE.", mins: 8, sim: true },
       { path: "fundamentals/systems/12-consensus-and-raft", title: "Consensus & Raft", desc: "Leader election, log replication, majorities.", mins: 9, sim: true },
       { path: "fundamentals/systems/13-distributed-transactions-and-sagas", title: "Distributed Transactions & Sagas", desc: "Two-phase commit vs sagas with compensations.", mins: 9, sim: true },
-      { path: "fundamentals/systems/14-bloom-filters", title: "Bloom Filters & Sketches", desc: "Probably yes, definitely no — plus HyperLogLog and friends.", mins: 7, sim: true }
+      { path: "fundamentals/systems/14-bloom-filters", title: "Bloom Filters & Sketches", desc: "Probably yes, definitely no — plus HyperLogLog and friends.", mins: 7, sim: true },
+      { path: "fundamentals/systems/15-data-models-and-query-languages", title: "Data Models", desc: "Relational, document, graph and more.", mins: 8, sim: true },
+      { path: "fundamentals/systems/16-storage-engines-lsm-vs-btree", title: "Storage Engines: LSM vs B-Tree", desc: "Memtables, SSTables, compaction, OLTP vs OLAP.", mins: 9, sim: true },
+      { path: "fundamentals/systems/17-encoding-and-schema-evolution", title: "Encoding & Schema Evolution", desc: "JSON, Protobuf, Avro; backward/forward compatibility.", mins: 8, sim: true },
+      { path: "fundamentals/systems/18-transactions-and-isolation-levels", title: "Transactions & Isolation Levels", desc: "Dirty reads, lost updates, write skew, MVCC.", mins: 10, sim: true },
+      { path: "fundamentals/systems/19-time-clocks-and-ordering", title: "Time, Clocks & Ordering", desc: "Clock skew, Lamport/vector clocks, fencing tokens.", mins: 9, sim: true },
+      { path: "fundamentals/systems/20-batch-and-stream-processing", title: "Batch & Stream Processing", desc: "MapReduce, windows, watermarks, CDC, Lambda vs Kappa.", mins: 10, sim: true }
     ]
   },
   {
@@ -139,7 +146,10 @@ window.CATALOG = [
       { path: "classic-system-design/25-ad-click-aggregation", title: "Ad Click Aggregation", desc: "Exactly-once streaming counts.", mins: 20 },
       { path: "classic-system-design/26-online-code-judge", title: "Online Code Judge (LeetCode)", desc: "Sandboxing untrusted code, contests.", mins: 20 },
       { path: "classic-system-design/27-live-streaming", title: "Live Streaming (Twitch)", desc: "Low-latency video and live chat.", mins: 20 },
-      { path: "classic-system-design/28-web-search-engine", title: "Web Search Engine", desc: "Inverted index, sharding, ranking.", mins: 25 }
+      { path: "classic-system-design/28-web-search-engine", title: "Web Search Engine", desc: "Inverted index, sharding, ranking.", mins: 25 },
+      { path: "classic-system-design/29-nearby-friends", title: "Nearby Friends", desc: "Live location sharing with pub/sub.", mins: 20 },
+      { path: "classic-system-design/30-google-maps", title: "Google Maps", desc: "Tiles, routing graphs, live-traffic ETA.", mins: 25 },
+      { path: "classic-system-design/31-digital-wallet", title: "Digital Wallet", desc: "1M transfers/s with event sourcing.", mins: 25 }
     ]
   },
   {
